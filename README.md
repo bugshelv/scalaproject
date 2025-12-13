@@ -8,6 +8,10 @@ Paweł Witkowski
 
 Aleksandra Woźnica
 
+## Ważne
+Defaultowy branch (main) nazywa się play-framework, zapewne zmienimy w przyszłości nazwę na main.
+Co oznacza, że pobierając kod z Githuba używajcie ```git pull origin play-framework``` 
+
 ## Użyte frameworki
 - **Play** https://www.playframework.com/
 - **Bootstrap 5** - do frontendu. Dokumentacja: https://getbootstrap.com/docs/5.0/getting-started/introduction/
