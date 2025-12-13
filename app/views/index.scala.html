@@ -1,5 +1,37 @@
 @()
 
-@main("Welcome to Play") {
-  <h1>Welcome to Play!</h1>
+@main("Moja biblioteczka") {
+<!-- kolory strony do zmiany w przyszłości -->
+<style>
+    .green-background-panel {
+        background-color: #4A9782;
+        padding: 20px;
+        border-radius: 4px;
+        min-height: 450px;
+        color: white;
+    }
+</style>
+
+<div class="container mt-4"> <div class="text-center mb-5">
+    <h1 class="display-3">Moja biblioteczka</h1>
+    <br>
+    <button class="btn btn-light btn-lg">Dodaj książkę</button>
+</div>
+
+    <div class="row">
+
+        <div class="col-md-7">
+            <div class="green-background-panel"> <!-- do dodania przyciski z tytułami książek -->
+                Lista książek - docelowo ma być tak jak w Figmie
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="green-background-panel">
+                Szczegóły książki - docelowo tak jak w Figmie
+            </div>
+        </div>
+
+    </div> </div>
 }
+

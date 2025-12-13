@@ -1,13 +1,19 @@
 # Projekt Scala
 
 Julia Masiarz
-Natalia Uścińska
+
+Natalia Uścińska - frontend
+
 Paweł Witkowski
+
 Aleksandra Woźnica
 
+## Użyte frameworki
+- **Play** https://www.playframework.com/
+- **Bootstrap 5** - do frontendu. Dokumentacja: https://getbootstrap.com/docs/5.0/getting-started/introduction/
+
 ## Instalacja
-### sbt (ver. sbt-1.11.7)
-Należy pobrać ze strony: www.scala-sbt.org/download/
+-  **sbt (ver. sbt-1.11.7)** należy pobrać ze strony: www.scala-sbt.org/download/
 
 ## Jak uruchomić
 1) Otwórz terminal, przejdź w nim do folderu z projektem, np. ```cd scalaproject```

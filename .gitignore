@@ -1,5 +1,5 @@
 scalaproject/logs
-target
+target/
 /.bsp
 /.idea
 /.idea_modules
