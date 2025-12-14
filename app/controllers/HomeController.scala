@@ -21,4 +21,9 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
   def index() = Action { implicit request: Request[AnyContent] =>
     Ok(views.html.index())
   }
+
+  def addBook() = Action { implicit request: Request[AnyContent] =>
+    Ok(views.html.addBook())
+  }
+
 }
