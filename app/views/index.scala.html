@@ -28,7 +28,7 @@
                 <ul class="list-group">
                     @for(book <- books) {
                     <li class="list-group-item">
-                        <a href="@routes.HomeController.showBook(book.id)" style="color: white;">
+                        <a href="@routes.HomeController.showBook(book.isbn)" style="color: pink;">
                             <strong>@book.title</strong>
                         </a>
                         <br>
@@ -45,7 +45,7 @@
                 @selectedBook.map { book =>
                     <h3>@book.title</h3>
                     <p><strong>Autor:</strong> @book.author</p>
-                    <p><strong>ID książki:</strong> @book.id</p>
+                    <p><strong>ISBN:</strong> @book.isbn</p>
                 }.getOrElse {
                     <p>Szczegóły książki będą wyświetlone tutaj po kliknięciu.</p>
                 }

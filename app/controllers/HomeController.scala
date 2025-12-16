@@ -28,9 +28,9 @@ class HomeController @Inject()(
     Ok(views.html.index(books)) // selectedBook = None by default
   }
 
-  def showBook(id: Long) = Action { implicit request =>
+  def showBook(isbn: String) = Action { implicit request =>
     val books = bookRepository.findAll()
-    val selectedBook = books.find(_.id == id)
+    val selectedBook = books.find(_.isbn == isbn)
     Ok(views.html.index(books, selectedBook))
   }
 
