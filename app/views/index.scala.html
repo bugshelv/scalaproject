@@ -1,4 +1,4 @@
-@()
+@(books: List[models.Book], selectedBook: Option[models.Book] = None)
 
 @main("Strona główna") {
 <!-- kolory strony do zmiany w przyszłości -->
@@ -22,13 +22,33 @@
 
         <div class="col-md-7">
             <div class="green-background-panel"> <!-- do dodania przyciski z tytułami książek -->
-                Lista książek - docelowo ma być tak jak w Figmie
+                @if(books.isEmpty) {
+                <p>Brak książek.</p>
+                } else {
+                <ul class="list-group">
+                    @for(book <- books) {
+                    <li class="list-group-item">
+                        <a href="@routes.HomeController.showBook(book.id)" style="color: white;">
+                            <strong>@book.title</strong>
+                        </a>
+                        <br>
+                        <small>@book.author</small>
+                    </li>
+                    }
+                </ul>
+                }
             </div>
         </div>
 
         <div class="col-md-5">
             <div class="green-background-panel">
-                Szczegóły książki - docelowo tak jak w Figmie
+                @selectedBook.map { book =>
+                    <h3>@book.title</h3>
+                    <p><strong>Autor:</strong> @book.author</p>
+                    <p><strong>ID książki:</strong> @book.id</p>
+                }.getOrElse {
+                    <p>Szczegóły książki będą wyświetlone tutaj po kliknięciu.</p>
+                }
             </div>
         </div>
 
