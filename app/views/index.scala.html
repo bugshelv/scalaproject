@@ -10,6 +10,32 @@
         min-height: 450px;
         color: white;
     }
+
+    .book-button {
+    display: block;
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 6px;
+    color: white;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+    margin: 10px
+    }
+
+    .book-button:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: white;
+    }
+
+    .book-button.active {
+        background-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .book-author {
+        font-size: 0.85rem;
+        opacity: 0.85;
+    }
+
 </style>
 
 <div class="container mt-4"> <div class="text-center mb-5">
@@ -25,17 +51,15 @@
                 @if(books.isEmpty) {
                 <p>Brak książek.</p>
                 } else {
-                <ul class="list-group">
-                    @for(book <- books) {
-                    <li class="list-group-item">
-                        <a href="@routes.HomeController.showBook(book.isbn)" style="color: pink;">
-                            <strong>@book.title</strong>
-                        </a>
-                        <br>
-                        <small>@book.author</small>
-                    </li>
-                    }
-                </ul>
+                @for(book <- books) { <!-- trzeba to wycentrowac lol -->
+                <a href="@routes.HomeController.showBook(book.isbn)"
+                   class="book-button
+                   @if(selectedBook.exists(_.isbn == book.isbn)) { active }">
+
+                    <strong>@book.title</strong><br>
+                    <span class="book-author">@book.author</span>
+                </a>
+                }
                 }
             </div>
         </div>
