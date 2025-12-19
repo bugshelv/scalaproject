@@ -19,6 +19,40 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
 ## Instalacja
 -  **sbt (ver. sbt-1.11.7)** należy pobrać ze strony: www.scala-sbt.org/download/
 
+## Roadmap
+
+### Scala
+
+- [x] Wyświetl książki
+  - [x] Wyświetlaj BookEntries
+  - [ ] BookEntries wg. usera
+- [x] Dodaj książkę
+- [x] Pokaż detale w prawym panelu
+- [ ] Dodać edytowanie BookEntry w prawym panelu
+- [ ] Dodać usuwanie BookEntry
+- [ ] Dodać zapisywanie w LocalStorage dla guesta?
+- [ ] Dodać filtrowanie książek
+
+### UI
+
+- [ ] Dodawanie książki
+- [ ] Wyświetlić wszystkie pola z Book Entry i Book w detalach
+- [ ] Dodać edytowanie BookEntry w prawym panelu
+- [ ] Dodać usuwanie BookEntry
+- [ ] Dodać okładki książek
+- [ ] Dodać filtrowanie książek
+- [ ] Dodać logowanie!!!!!!!
+
+### Backend
+
+- [ ] DB
+- [ ] Przerzucić z repositories do DB
+
+### API
+
+- [ ] Wybrać API
+
+
 ## Jak uruchomić
 1) Otwórz terminal, przejdź w nim do folderu z projektem, np. ```cd scalaproject```
 2) Uruchom aplikację wpisując ```sbt run```
