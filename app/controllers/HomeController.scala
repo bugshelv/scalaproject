@@ -10,7 +10,6 @@ import javax.inject._
 import repositories.BookRepository
 import repositories.BookEntryRepository
 
-import java.time.LocalDateTime
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -76,10 +75,7 @@ class HomeController @Inject()(
         val newEntry = BookEntry(
           id = bookEntryRepository.nextId(),
           user_id = userId,
-          isbn = bookData.isbn,
-          created_at = LocalDateTime.now(),
-          status = "to read",
-          pages_read = 0
+          isbn = bookData.isbn
         )
         bookEntryRepository.add(newEntry)
 

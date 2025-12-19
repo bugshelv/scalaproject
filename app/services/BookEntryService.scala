@@ -1,13 +1,13 @@
 package services
 
 import javax.inject._
-import models.BookEntry
+import models.{BookEntry, BookStatus}
 import repositories.BookEntryRepository
 
 @Singleton
 class BookEntryService @Inject()(repo: BookEntryRepository) {
 
-  def changeStatus(entry: BookEntry, newStatus: String): BookEntry = {
+  def changeStatus(entry: BookEntry, newStatus: BookStatus): BookEntry = {
     val updated = entry.copy(status = newStatus)
     repo.update(updated)
     updated
@@ -20,7 +20,7 @@ class BookEntryService @Inject()(repo: BookEntryRepository) {
   }
 
   def markAsFinished(entry: BookEntry): BookEntry = {
-    val updated = entry.copy(status = "finished")
+    val updated = entry.copy(status = BookStatus.Finished)
     repo.update(updated)
     updated
   }
