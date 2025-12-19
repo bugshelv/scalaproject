@@ -68,7 +68,7 @@ class HomeController @Inject()(
       formWithErrors => BadRequest(views.html.addBook(formWithErrors)),
       bookData => {
         bookRepository.add(bookData)
-        Redirect(controllers.HomeController.index())
+        Redirect(routes.HomeController.index())
       }
     )
   }
