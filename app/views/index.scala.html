@@ -57,6 +57,7 @@
                                class="book-button
                                @if(selectedBook.exists(_._1.isbn == entry.isbn)) { active }">
                                 @bookOpt.map { book =>
+
                                     <strong>@book.title</strong><br>
                                     <span class="book-author">@book.author</span>
                                 }.getOrElse {
@@ -72,6 +73,17 @@
         <div class="col-md-5">
             <div class="green-background-panel">
                 @selectedBook.map { case (entry, book) =>
+                    @if(book.cover.nonEmpty) {
+                        <div class="text-center mb-3">
+                            <img
+                                    src="@book.cover"
+                                    alt="Okładka książki"
+                                    class="img-fluid rounded shadow"
+                                    style="max-height: 300px;"
+                            >
+                        </div>
+                    }
+
                     <h3>@book.title</h3>
                     <p><strong>Autor:</strong> @book.author</p>
                     <p><strong>ISBN:</strong> @book.isbn</p>
