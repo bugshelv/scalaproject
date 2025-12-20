@@ -62,9 +62,6 @@ class HomeController @Inject()(
     )
   )
 
-
-
-
   def addBook() = Action { implicit request: Request[AnyContent] =>
     Ok(views.html.addBook(bookForm))
   }
@@ -76,28 +73,46 @@ class HomeController @Inject()(
           BadRequest(views.html.addBook(formWithErrors))
         ),
 
-      isbn =>
-        openLibraryService.fetchByIsbn(isbn).map {
-          case Some(fetchedBook) =>
-            bookRepository.add(fetchedBook)
+      isbn => {
+        val userId: Long = 1 // TODO: replace with logged-in user ID
 
-            val userId: Long = 1
-            val newEntry = BookEntry(
-              id = bookEntryRepository.nextId(),
-              userId = userId,
-              isbn = fetchedBook.isbn
-            )
-            bookEntryRepository.add(newEntry)
+        val alreadyExists =
+          bookEntryRepository.findAll().exists(entry =>
+            entry.userId == userId && entry.isbn == isbn
+          )
 
-            Redirect(routes.HomeController.index())
-
-          case None =>
+        if (alreadyExists) {
+          Future.successful(
             BadRequest(
               views.html.addBook(
-                bookForm.withGlobalError("Nie znaleziono książki dla tego ISBN")
+                bookForm.withGlobalError("Ta książka jest już w Twojej bibliotece")
               )
             )
+          )
+        } else {
+          openLibraryService.fetchByIsbn(isbn).map {
+            case Some(fetchedBook) =>
+              bookRepository.add(fetchedBook)
+
+              val userId: Long = 1
+              val newEntry = BookEntry(
+                id = bookEntryRepository.nextId(),
+                userId = userId,
+                isbn = fetchedBook.isbn
+              )
+              bookEntryRepository.add(newEntry)
+
+              Redirect(routes.HomeController.index())
+
+            case None =>
+              BadRequest(
+                views.html.addBook(
+                  bookForm.withGlobalError("Nie znaleziono książki dla tego ISBN")
+                )
+              )
+          }
         }
+      }
     )
   }
 

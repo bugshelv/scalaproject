@@ -65,3 +65,8 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
 1) Otwórz terminal, przejdź w nim do folderu z projektem, np. ```cd scalaproject```
 2) Uruchom aplikację wpisując ```sbt run```
 3) Otwórz przeglądarkę i wejdź na http://localhost:9000/
+
+
+## Ikonki
+Na razie używamy https://www.svgrepo.com/collection/iconship-interface-icons
+Inne ładne https://www.svgrepo.com/collection/software-mansion-curved-line-icons
