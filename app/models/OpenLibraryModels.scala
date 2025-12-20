@@ -1,6 +1,8 @@
 package models
 
 import play.api.libs.json._
+import play.api.libs.functional.syntax._
+
 
 case class OpenLibraryAuthor(name: String)
 case class OpenLibraryCover(medium: Option[String])
@@ -16,5 +18,13 @@ case class OpenLibraryBook(
 object OpenLibraryBook {
   implicit val authorReads: Reads[OpenLibraryAuthor] = Json.reads
   implicit val coverReads: Reads[OpenLibraryCover] = Json.reads
-  implicit val bookReads: Reads[OpenLibraryBook] = Json.reads
+
+  // custom Reads, so we can keep camel case notation
+  implicit val bookReads: Reads[OpenLibraryBook] = (
+    (JsPath \ "title").read[String] and
+      (JsPath \ "authors").read[Seq[OpenLibraryAuthor]] and
+      (JsPath \ "publish_date").readNullable[String] and    // "publish_date" → publishDate
+      (JsPath \ "number_of_pages").readNullable[Int] and   //  "number_of_pages" → numberOfPages
+      (JsPath \ "cover").readNullable[OpenLibraryCover]
+    )(OpenLibraryBook.apply _)
 }
