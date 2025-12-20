@@ -8,7 +8,7 @@ import scala.concurrent.{Future, ExecutionContext}
 class UserRepository @Inject()()(implicit ec: ExecutionContext) {
 
   private val users = Seq(
-    User(1, "ola", "admin1"), // password: secret
+    User(1, "ola", "admin1"),
   )
 
   def findByUsername(username: String): Future[Option[User]] =

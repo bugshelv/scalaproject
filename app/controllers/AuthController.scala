@@ -27,7 +27,10 @@ class AuthController @Inject()(
         userRepo.findByUsername(loginData.username).map {
           case Some(user) if user.password == loginData.password =>
 
-            Redirect("/").withSession("username" -> user.username)
+            Redirect("/").withSession(
+              "username" -> user.username,
+              "userId" -> user.id.toString
+            )
           case _ =>
 
             val formWithError = LoginForm.form.withGlobalError("Invalid username or password")

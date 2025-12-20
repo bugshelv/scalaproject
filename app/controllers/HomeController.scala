@@ -35,13 +35,17 @@ class HomeController @Inject()(
    * a path of `/`.
    */
   def index() = Action { implicit request =>
-    val bookEntries = bookEntryRepository.findAll()
-    val books = bookRepository.findAll()
-
     val maybeUsername: Option[String] = request.session.get("username")
+    val maybeUserId: Option[Long] = request.session.get("userId").map(_.toLong)
 
-    Ok(views.html.index(bookEntries, books, None, maybeUsername)) // selectedBook = None by default
-    // Q(AW): should I pass selectedBook = none explicitly?
+    val bookEntries: List[BookEntry] = maybeUserId match {
+      case Some(userId) => bookEntryRepository.findAll().filter(_.userId == userId)
+      case None => List.empty // not logged in -> show empty list
+    }
+
+    val books: List[Book] = bookRepository.findAll()
+
+    Ok(views.html.index(bookEntries, books, None, maybeUsername))
   }
 
   def showBook(isbn: String) = Action { implicit request =>
