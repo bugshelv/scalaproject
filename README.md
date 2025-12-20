@@ -33,7 +33,7 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
 - [x] Pokaż detale w prawym panelu
 - [ ] Dodać edytowanie BookEntry w prawym panelu
 - [ ] Dodać usuwanie BookEntry
-- [ ] Dodać zapisywanie w LocalStorage dla guesta?
+- [ ] Dodać zapisywanie dla guesta?
 - [ ] Dodać filtrowanie książek
 
 ### UI

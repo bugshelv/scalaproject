@@ -84,6 +84,11 @@ class HomeController @Inject()(
   }
 
   def addBookSubmit() = Action.async { implicit request =>
+    val maybeUserId: Option[Long] =
+      request.session.get("userId").map(_.toLong)
+
+    val userId: Long = maybeUserId.getOrElse(0L) // guest = 0
+
     bookForm.bindFromRequest().fold(
       formWithErrors =>
         Future.successful(
@@ -91,8 +96,6 @@ class HomeController @Inject()(
         ),
 
       isbn => {
-        val userId: Long = 1 // TODO: replace with logged-in user ID
-
         val alreadyExists =
           bookEntryRepository.findAll().exists(entry =>
             entry.userId == userId && entry.isbn == isbn
@@ -111,7 +114,6 @@ class HomeController @Inject()(
             case Some(fetchedBook) =>
               bookRepository.add(fetchedBook)
 
-              val userId: Long = 1
               val newEntry = BookEntry(
                 id = bookEntryRepository.nextId(),
                 userId = userId,
