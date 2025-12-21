@@ -38,7 +38,7 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
 
 ### UI
 
-- [ ] Dodawanie książki
+- [x] Dodawanie książki
 - [ ] Wyświetlić wszystkie pola z Book Entry i Book w detalach
   - [ ] pagesRead (BookEntry)
   - [x] cover (Book)
@@ -47,7 +47,7 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
 - [ ] Dodać usuwanie BookEntry
 - [ ] Dodać okładki książek
 - [ ] Dodać filtrowanie książek
-- [ ] Dodać logowanie!!!!!!!
+- [x] Dodać logowanie!!!!!!!
 
 ### Backend
 
