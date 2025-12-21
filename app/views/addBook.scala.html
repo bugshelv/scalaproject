@@ -5,13 +5,16 @@
 
 @main("Dodaj książkę") {
 
-<div class="container mt-4">
+<div class="container py-5">
     <div class="text-center mb-5">
         <h1 class="display-3">Dodaj nową książkę</h1>
-        <br>
-        <a href="@routes.HomeController.index()" class="btn btn-light btn-lg">Wróć do listy</a>
+        <p class="text-muted">Wprowadź dane poniżej, aby powiększyć swoją kolekcję.</p>
+        <a href="@routes.HomeController.index()" class="btn btn-light btn-secondary">
+            <i class="bi bi-arrow-left"></i> Wróć do listy
+        </a>
     </div>
 
+        <div class="row justify-content-center"> <div class="col-md-4">
     @helper.form(action = routes.HomeController.addBookSubmit()) {
         @CSRF.formField
 
@@ -20,19 +23,26 @@
             <div class="alert alert-danger">@error.message</div>
         }
 
-        <div class="mb-3">
-            @helper.inputText(bookForm("isbn"), '_label -> "ISBN", 'class -> "form-control")
-            <small id="ISBNhelp" class="form-text text-muted">Numer ISBN znajduje się na odwrocie okładki</small>
-        </div>
+    <div class="mb-3">
+        @helper.inputText(bookForm("isbn"),
+        '_label -> "ISBN",
+        'class -> "form-control",
+        'placeholder -> "Wpisz numer ISBN",
+        '_showConstraints -> false
+        )
+        <small class="form-text text-muted">Numer ISBN znajduje się na odwrocie okładki</small>
+    </div>
     <!--    <div class="mb-3">-->
     <!--        @helper.inputText(bookForm("title"), '_label -> "Tytuł", 'class -> "form-control")-->
     <!--    </div>-->
     <!--    <div class="mb-3">-->
     <!--        @helper.inputText(bookForm("author"), '_label -> "Autor", 'class -> "form-control")-->
     <!--    </div>-->
-
+            <div class="row justify-content-center"> <div class="col-md-5">
         <button type="submit" class="btn btn-primary btn-light">Dodaj książkę</button>
-    }
+                </div> </div>
 
+    }
+</div> </div>
 </div>
 }
