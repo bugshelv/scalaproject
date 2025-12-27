@@ -138,7 +138,7 @@ class HomeController @Inject()(
                 for {
                   existsOpt <- bookRepository.getByIsbn(fetchedBook.isbn)
                   _ <- existsOpt match {
-                    case Some(_) => Future.successful(0) // already present -> do nothing
+                    case Some(_) => Future.successful(0) // already in database -> do nothing
                     case None    => bookRepository.insert(fetchedBook).map(_ => 1)
                   }
                   _ <- ensureGuestF

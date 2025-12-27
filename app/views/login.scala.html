@@ -17,16 +17,16 @@
         <div class = "mb-3">
         @helper.inputText(
             loginForm("username"),
-            '_label -> "Nazwa użytkownika",
-            'class -> "form-control",
-            'placeholder -> "Wpisz nazwę użytkownika",
-            '_showConstraints -> false)
+            Symbol("_label") -> "Nazwa użytkownika",
+            Symbol("class") -> "form-control",
+            Symbol("placeholder") -> "Wpisz nazwę użytkownika",
+            Symbol("_showConstraints") -> false)
         @helper.inputPassword(
             loginForm("password"),
-            '_label -> "Hasło",
-            'class -> "form-control",
-            'placeholder -> "Hasło",
-            '_showConstraints -> false)
+            Symbol("_label") -> "Hasło",
+            Symbol("class") -> "form-control",
+            Symbol("placeholder") -> "Hasło",
+            Symbol("_showConstraints") -> false)
 </div></div></div>
         <div class="text-center mb-5">
         <button type="submit" class="btn btn-lg btn-light">Login</button>

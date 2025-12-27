@@ -69,12 +69,7 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
 2) Uruchom aplikację wpisując ```sbt run```
 3) Otwórz przeglądarkę i wejdź na http://localhost:9000/
 
-
-## Ikonki
-Na razie używamy https://www.svgrepo.com/collection/iconship-interface-icons
-Inne ładne https://www.svgrepo.com/collection/software-mansion-curved-line-icons
-
-## DB
+## DB 
 Aby testować z bazą danych, musicie przygotować bazę danych lokalnie (`your_username` **musi być waszym userem z linuxa**):
 
 ```
@@ -91,3 +86,8 @@ export DB_PASSWORD="your_password"
 ```
 psql "$DB_URL" -U "$DB_USER" -f create_tables.sql 
 ```
+
+## Ikonki
+Na razie używamy https://www.svgrepo.com/collection/iconship-interface-icons
+
+Inne ładne https://www.svgrepo.com/collection/software-mansion-curved-line-icons

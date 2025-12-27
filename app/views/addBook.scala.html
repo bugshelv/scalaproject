@@ -25,18 +25,18 @@
 
     <div class="mb-3">
         @helper.inputText(bookForm("isbn"),
-        '_label -> "ISBN",
-        'class -> "form-control",
-        'placeholder -> "Wpisz numer ISBN",
-        '_showConstraints -> false
+        Symbol("_label") -> "ISBN",
+        Symbol("class") -> "form-control",
+        Symbol("placeholder") -> "Wpisz numer ISBN",
+        Symbol("_showConstraints") -> false
         )
         <small class="form-text text-muted">Numer ISBN znajduje się na odwrocie okładki</small>
     </div>
     <!--    <div class="mb-3">-->
-    <!--        @helper.inputText(bookForm("title"), '_label -> "Tytuł", 'class -> "form-control")-->
+    <!--        @helper.inputText(bookForm("title"), Symbol("_label") -> "Tytuł", Symbol("class") -> "form-control")-->
     <!--    </div>-->
     <!--    <div class="mb-3">-->
-    <!--        @helper.inputText(bookForm("author"), '_label -> "Autor", 'class -> "form-control")-->
+    <!--        @helper.inputText(bookForm("author"), Symbol("_label") -> "Autor", Symbol("class") -> "form-control")-->
     <!--    </div>-->
             <div class="row justify-content-center"> <div class="col-md-5">
         <button type="submit" class="btn btn-primary btn-light">Dodaj książkę</button>
