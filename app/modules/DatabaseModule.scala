@@ -11,9 +11,5 @@ class DatabaseModule extends AbstractModule {
   @Provides
   @Singleton
   def provideSlickDatabase(conf: Configuration): Database =
-    // If a jdbc URL is configured, use the configured database; otherwise fall back to an in-memory H2 DB for dev/tests
-    conf.getOptional[String]("db.jdbcUrl") match {
-      case Some(_) => Database.forConfig("db", conf.underlying)
-      case None    => Database.forURL("jdbc:h2:mem:play;DB_CLOSE_DELAY=-1;MODE=PostgreSQL", driver = "org.h2.Driver")
-    }
+    Database.forConfig("db", conf.underlying)
 }
