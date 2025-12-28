@@ -47,7 +47,7 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
   - [ ] match case BookStatus -> na stronie ma być "w trakcie", "przeczytana" itp.
   - [ ] match case liczba stron -> na stronie ma być coś typu '-' lub 'brak informacji' gdy pobrane jest 0
 - [x] Dodać edytowanie BookEntry w prawym panelu
-- [ ] Dodać usuwanie BookEntry
+- [x] Dodać usuwanie BookEntry
 - [x] Dodać okładki książek
 - [ ] Dodać filtrowanie książek
 - [x] Dodać logowanie!!!!!!!
