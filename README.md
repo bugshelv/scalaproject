@@ -32,8 +32,8 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
 - [x] Dodaj książkę
 - [x] Pokaż detale w prawym panelu
 - [x] Na gościu nie widać książek
-- [ ] Dodać edytowanie BookEntry w prawym panelu
-- [ ] Dodać usuwanie BookEntry
+- [x] Dodać edytowanie BookEntry
+- [x] Dodać usuwanie BookEntry
 - [x] Dodać zapisywanie dla guesta?
 - [ ] Dodać filtrowanie książek
 - [x] WAŻNE - postarać się usunąć warningi przy sbt clean compile (osobny commit proszę)
@@ -42,11 +42,11 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
 
 - [x] Dodawanie książki
 - [ ] Wyświetlić wszystkie pola z Book Entry i Book w detalach
-  - [ ] pagesRead (BookEntry)
+  - [x] pagesRead (BookEntry)
   - [x] cover (Book)
   - [ ] match case BookStatus -> na stronie ma być "w trakcie", "przeczytana" itp.
   - [ ] match case liczba stron -> na stronie ma być coś typu '-' lub 'brak informacji' gdy pobrane jest 0
-- [ ] Dodać edytowanie BookEntry w prawym panelu
+- [x] Dodać edytowanie BookEntry w prawym panelu
 - [ ] Dodać usuwanie BookEntry
 - [x] Dodać okładki książek
 - [ ] Dodać filtrowanie książek
