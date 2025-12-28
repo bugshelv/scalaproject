@@ -4,28 +4,34 @@
 # ~~~~
 
 # Homepage
-GET     /                           controllers.HomeController.index()
+GET     /                               controllers.HomeController.index()
 
 # Map static resources
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+GET     /assets/*file                   controllers.Assets.versioned(path="/public", file: Asset)
 
 # Show a specific book
-GET     /book/:isbn                 controllers.HomeController.showBook(isbn: String)
+GET     /book/:isbn                     controllers.HomeController.showBook(isbn: String)
 
 # Add book form
-GET     /add-book                   controllers.HomeController.addBook()
-POST    /add-book                   controllers.HomeController.addBookSubmit()
+GET     /add-book                       controllers.HomeController.addBook()
+POST    /add-book                       controllers.HomeController.addBookSubmit()
 
 # Delete book
-GET     /delete-book                controllers.HomeController.deleteBook(id: Long)
+GET     /delete-book                    controllers.HomeController.deleteBook(id: Long)
 
 # Edit book form
 GET     /edit-book-entry/:id            controllers.HomeController.editBookEntry(id: Long)
-POST    /edit-book-entry            controllers.HomeController.editBookEntrySubmit()
+POST    /edit-book-entry                controllers.HomeController.editBookEntrySubmit()
+
+# Edit pages read
+POST    /book-entry/:id/pages-read      controllers.HomeController.updatePagesRead(id: Long)
+
+# Edit status
+POST    /book-entry/:id/status          controllers.HomeController.updateStatus(id: Long)
 
 # Log in form
-GET     /login                      controllers.AuthController.loginPage()
-POST    /login                      controllers.AuthController.loginSubmit()
+GET     /login                          controllers.AuthController.loginPage()
+POST    /login                          controllers.AuthController.loginSubmit()
 
 # Log out
-GET     /logout                     controllers.AuthController.logout()
+GET     /logout                         controllers.AuthController.logout()

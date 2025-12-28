@@ -1,6 +1,8 @@
 package persistence
 
 import models.BookEntry
+import models.BookStatus
+import persistence.SlickColumnMappers._
 import persistence.tables.BookEntries
 import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.{Future, ExecutionContext}
@@ -24,5 +26,11 @@ class BookEntryRepository @Inject()(db: Database)(implicit ec: ExecutionContext)
 
   def delete(id: Long): Future[Int] =
     db.run(table.filter(_.id === id).delete)
+
+  def updatePagesRead(id: Long, pagesRead: Int): Future[Int] =
+    db.run(table.filter(_.id === id).map(_.pagesRead).update(pagesRead))
+
+  def updateStatus(id: Long, status: BookStatus): Future[Int] =
+    db.run(table.filter(_.id === id).map(_.status).update(status))
 }
 

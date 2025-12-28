@@ -1,6 +1,6 @@
 package controllers
 
-import models.{Book, BookEntry, User}
+import models.{Book, BookEntry, User, BookStatus}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
@@ -14,6 +14,7 @@ import repositories.{BookRepository => TestBookRepository}
 import repositories.{BookEntryRepository => TestBookEntryRepository}
 import persistence.BookRepository
 import persistence.BookEntryRepository
+import persistence.SlickColumnMappers._
 
 
 /**
@@ -167,6 +168,7 @@ class HomeController @Inject()(
   }
 
   def editBookEntry(id: Long) = Action.async { implicit request =>
+    val maybeUsername: Option[String] = request.session.get("username")
     for {
       entryOpt <- bookEntryRepository.getById(id)
       bookOpt <- entryOpt match {
@@ -175,7 +177,7 @@ class HomeController @Inject()(
       }
     } yield {
       (entryOpt, bookOpt) match {
-        case (Some(entry), Some(book)) => Ok(views.html.editBookEntry((entry, book)))
+        case (Some(entry), Some(book)) => Ok(views.html.editBookEntry(entry, book, maybeUsername))
         case _ => NotFound("Książka nie znaleziona")
       }
     }
@@ -238,6 +240,38 @@ class HomeController @Inject()(
         }
       }
     )
+  }
+
+  def updatePagesRead(id: Long) = Action { implicit request =>
+    request.body.asFormUrlEncoded
+      .flatMap(_.get("pagesRead").flatMap(_.headOption))
+      .flatMap(s => scala.util.Try(s.toInt).toOption) match {
+
+      case Some(pages) =>
+        bookEntryRepository.updatePagesRead(id, pages)
+        Redirect(routes.HomeController.editBookEntry(id))
+
+      case None =>
+        BadRequest("Nieprawidłowa liczba stron")
+    }
+  }
+
+  def updateStatus(id: Long) = Action { implicit request =>
+    val statusOpt: Option[BookStatus] =
+      for {
+        form <- request.body.asFormUrlEncoded
+        value <- form.get("status").flatMap(_.headOption)
+        status <- BookStatus.fromString(value.toLowerCase)
+      } yield status
+
+    statusOpt match {
+      case Some(status) =>
+        bookEntryRepository.updateStatus(id, status)
+        Redirect(routes.HomeController.editBookEntry(id))
+
+      case None =>
+        BadRequest("Nieprawidłowy status")
+    }
   }
 
 }

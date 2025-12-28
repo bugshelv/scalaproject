@@ -1,7 +1,7 @@
 @(bookEntries: List[models.BookEntry],
 books: List[models.Book],
 selectedBook: Option[(models.BookEntry, models.Book)] = None,
-username: Option[String] = None)
+username: Option[String] = None)(implicit request: play.api.mvc.RequestHeader)
 
 @main("Strona główna") {
 <!-- kolory strony do zmiany w przyszłości -->
