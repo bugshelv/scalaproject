@@ -100,18 +100,20 @@ username: Option[String] = None)(implicit request: play.api.mvc.RequestHeader)
                     </a>
                 </div>
 
-                @if(book.cover.nonEmpty) {
-                        <div class="text-center mb-3">
-                            <img
-                                    src="@book.cover"
-                                    alt="Okładka książki"
-                                    class="img-fluid rounded shadow"
-                                    style="max-height: 300px;"
-                            >
-                        </div>
-                    }
 
-                    <h3>@book.title</h3>
+                <div class="text-center mb-3">
+                    <img
+                            src="@book.cover"
+                            alt="Okładka książki"
+                            class="img-fluid rounded shadow"
+                            style="max-height: 300px;"
+                    >
+                </div>
+
+
+
+
+                <h3>@book.title</h3>
                     <p><strong>Autor:</strong> @book.author</p>
                     <p><strong>ISBN:</strong> @book.isbn</p>
                     <p><strong>Rok publikacji:</strong> @book.publishYear</p>

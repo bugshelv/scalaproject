@@ -54,7 +54,7 @@ class HomeController @Inject()(
       booksSeq    <- bookRepository.getAll()
     } yield {
       val userIsbns = bookEntries.map(_.isbn).toSet
-      val books = booksSeq.filter(b => userIsbns.contains(b.isbn)).toList
+      val books = booksSeq.filter(b => userIsbns.contains(b.isbn)).map(ensureCover).toList
       Ok(views.html.index(bookEntries, books, None, maybeUsername))
     }
   }
@@ -77,7 +77,7 @@ class HomeController @Inject()(
       userIsbns  <- userIsbnsF
       booksSeq   <- bookRepository.getAll()
     } yield {
-      val books = booksSeq.toList.filter(b => userIsbns.contains(b.isbn))
+      val books = booksSeq.toList.filter(b => userIsbns.contains(b.isbn)).map(ensureCover)
 
       val selectedBook: Option[(BookEntry, Book)] =
         for {
@@ -129,6 +129,7 @@ class HomeController @Inject()(
           } else {
             openLibraryService.fetchByIsbn(isbn).flatMap {
               case Some(fetchedBook) =>
+                val bookWithCover = ensureCover(fetchedBook)
                 val ensureGuestF: Future[Unit] = if (userId == 0L) {
                   userRepository.getById(0L).flatMap {
                     case Some(_) => Future.successful(())
@@ -137,13 +138,13 @@ class HomeController @Inject()(
                 } else Future.successful(())
 
                 for {
-                  existsOpt <- bookRepository.getByIsbn(fetchedBook.isbn)
+                  existsOpt <- bookRepository.getByIsbn(bookWithCover.isbn)
                   _ <- existsOpt match {
                     case Some(_) => Future.successful(0) // already in database -> do nothing
-                    case None    => bookRepository.insert(fetchedBook).map(_ => 1)
+                    case None    => bookRepository.insert(bookWithCover).map(_ => 1)
                   }
                   _ <- ensureGuestF
-                  _ <- bookEntryRepository.insert(BookEntry(0L, userId, fetchedBook.isbn))
+                  _ <- bookEntryRepository.insert(BookEntry(0L, userId, bookWithCover.isbn))
                 } yield Redirect(routes.HomeController.index())
 
               case None =>
@@ -177,7 +178,7 @@ class HomeController @Inject()(
       }
     } yield {
       (entryOpt, bookOpt) match {
-        case (Some(entry), Some(book)) => Ok(views.html.editBookEntry(entry, book, maybeUsername))
+        case (Some(entry), Some(book)) => Ok(views.html.editBookEntry(entry, ensureCover(book), maybeUsername))
         case _ => NotFound("Książka nie znaleziona")
       }
     }
@@ -210,6 +211,7 @@ class HomeController @Inject()(
           } else {
             openLibraryService.fetchByIsbn(isbn).flatMap {
               case Some(fetchedBook) =>
+                val bookWithCover = ensureCover(fetchedBook)
                 val ensureGuestF: Future[Unit] = if (userId == 0L) {
                   userRepository.getById(0L).flatMap {
                     case Some(_) => Future.successful(())
@@ -218,13 +220,13 @@ class HomeController @Inject()(
                 } else Future.successful(())
 
                 for {
-                  existsOpt <- bookRepository.getByIsbn(fetchedBook.isbn)
+                  existsOpt <- bookRepository.getByIsbn(bookWithCover.isbn)
                   _ <- existsOpt match {
                     case Some(_) => Future.successful(0) // already in database -> do nothing
-                    case None    => bookRepository.insert(fetchedBook).map(_ => 1)
+                    case None    => bookRepository.insert(bookWithCover).map(_ => 1)
                   }
                   _ <- ensureGuestF
-                  _ <- bookEntryRepository.insert(BookEntry(0L, userId, fetchedBook.isbn))
+                  _ <- bookEntryRepository.insert(BookEntry(0L, userId, bookWithCover.isbn))
                 } yield Redirect(routes.HomeController.index())
 
               case None =>
@@ -306,5 +308,10 @@ class HomeController @Inject()(
         BadRequest("Nieprawidłowy status")
     }
   }
+  private def ensureCover(book: Book): Book = {
+    val coverValue = if (book.cover.isEmpty) "/assets/images/placeholder_cover.png" else book.cover
+    book.copy(cover = coverValue)
+  }
+
 
 }
