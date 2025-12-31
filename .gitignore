@@ -10,8 +10,8 @@ target/
 /.vscode
 /.metals
 /.bloop
-/public/uploads
 /project
+/public/uploads/*
 !/project/plugins.sbt
 !/project/build.properties
 /RUNNING_PID
