@@ -62,6 +62,15 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
 - [x] Wybrać API
 - [x] Dodać dodawanie przez API
   - [ ] Dodać wyszukiwanie za pomocą tytułu przez API?
+     
+
+### Testowanie
+- [] Analiza domeny
+  - [] Przegląd modeli oraz routingu
+  - [] Zrozumienie workflow: dodanie książki -> zapis w database -> wyśwetlenie w UI
+- [] Testy Jednostkowe
+  - [] Walidacja modeli domenowych i logiki pomocniczej
+  - [] Sprawdzenie reguł: komunikaty, obsługa statusów BookStatus i liczby storn.
 
 
 ## Jak uruchomić
