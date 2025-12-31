@@ -15,6 +15,9 @@ import repositories.{BookEntryRepository => TestBookEntryRepository}
 import persistence.BookRepository
 import persistence.BookEntryRepository
 import persistence.SlickColumnMappers._
+import java.nio.file.Paths
+import java.nio.file.Files
+import play.api.Configuration
 
 
 /**
@@ -27,7 +30,8 @@ class HomeController @Inject()(
                                 bookRepository: BookRepository,
                                 bookEntryRepository: BookEntryRepository,
                                 userRepository: persistence.UserRepository,
-                                openLibraryService: services.OpenLibraryService
+                                openLibraryService: services.OpenLibraryService,
+                                config: Configuration
                               )(implicit ec: ExecutionContext)
                                 extends BaseController with I18nSupport {
 
@@ -251,22 +255,26 @@ class HomeController @Inject()(
     request.body.file("cover") match {
       case Some(file) =>
         val filename = s"${java.time.Instant.now().toEpochMilli}_${file.filename}"
-        val path = s"public/uploads/$filename"
+        val directory = Paths.get(config.get[String]("app.uploads.dir"))
 
-        file.ref.moveTo(new java.io.File(path),
-          replace = true)
+        Files.createDirectories(directory)
+
+        val path = directory.resolve(filename)
+
+        file.ref.moveTo(path, replace = true)
 
         // Getting the entry id
         bookEntryRepository.getById(entryId).flatMap {
           case Some(entry) =>
             // Get book's ISBN
             val updated = entry.copy(
-              altCover = s"/assets/uploads/$filename"
+              altCover = filename
             )
             bookEntryRepository.update(updated).map { _ =>
               Redirect(routes.HomeController.editBookEntry(entryId))
             }
           case None =>
+            Files.deleteIfExists(path)
             Future.successful(NotFound("Nie znaleziono wpisu"))
         }
       case None =>
@@ -307,10 +315,20 @@ class HomeController @Inject()(
         BadRequest("Nieprawidłowy status")
     }
   }
+
   private def ensureCover(book: Book): Book = {
     val coverValue = if (book.cover.isEmpty) "/assets/images/placeholder_cover.png" else book.cover
     book.copy(cover = coverValue)
   }
+
+  def serveUpload(filename: String) = Action {
+    val uploadDir = Paths.get(config.get[String]("app.uploads.dir"))
+    val file = uploadDir.resolve(filename).toFile
+
+    if (file.exists()) Ok.sendFile(file)
+    else NotFound("Nie znaleziono wpisu")
+  }
+
 
 
 

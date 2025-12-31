@@ -36,4 +36,8 @@ POST    /login                          controllers.AuthController.loginSubmit()
 # Log out
 GET     /logout                         controllers.AuthController.logout()
 
-POST    /books/:entryId/editCover      controllers.HomeController.editBookCover(entryId: Long)
+# Edit cover
+POST    /books/:entryId/editCover       controllers.HomeController.editBookCover(entryId: Long)
+
+# Serve files
+GET     /uploads/:filename              controllers.HomeController.serveUpload(filename: String)
