@@ -23,54 +23,28 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
 
 ### Scala
 
-- [x] Wyświetl książki
-  - [x] Wyświetlaj BookEntries
-  - [x] BookEntries wg. usera
-  - [x] "Już masz tą książkę"
-  - [x] "Ta książka nie istnieje"
-    - [ ] "stwórz ją!!!!"
-- [x] Dodaj książkę
-- [x] Pokaż detale w prawym panelu
-- [x] Na gościu nie widać książek
-- [x] Dodać edytowanie BookEntry
-- [x] Dodać usuwanie BookEntry
-- [x] Dodać zapisywanie dla guesta?
+- [ ] Dodaj książkę
+  - [ ] Stwórz książkę jak isbn nie jest w OpenLibrary
 - [ ] Dodać filtrowanie książek
-- [x] WAŻNE - postarać się usunąć warningi przy sbt clean compile (osobny commit proszę)
 
-### UI
+### Frontend
 
-- [x] Dodawanie książki
 - [ ] Wyświetlić wszystkie pola z Book Entry i Book w detalach
-  - [x] pagesRead (BookEntry)
-  - [x] cover (Book)
   - [ ] match case BookStatus -> na stronie ma być "w trakcie", "przeczytana" itp.
   - [ ] match case liczba stron -> na stronie ma być coś typu '-' lub 'brak informacji' gdy pobrane jest 0
-- [x] Dodać edytowanie BookEntry w prawym panelu
-- [x] Dodać usuwanie BookEntry
-- [x] Dodać okładki książek
 - [ ] Dodać filtrowanie książek
-- [x] Dodać logowanie!!!!!!!
-
-### Backend
-
-- [x] DB
-- [x] Przerzucić z repositories do DB
 
 ### API
 
-- [x] Wybrać API
-- [x] Dodać dodawanie przez API
-  - [ ] Dodać wyszukiwanie za pomocą tytułu przez API?
-     
+- [ ] Dodać wyszukiwanie za pomocą tytułu przez API?
 
 ### Testowanie
-- [] Analiza domeny
-  - [] Przegląd modeli oraz routingu
-  - [] Zrozumienie workflow: dodanie książki -> zapis w database -> wyśwetlenie w UI
-- [] Testy Jednostkowe
-  - [] Walidacja modeli domenowych i logiki pomocniczej
-  - [] Sprawdzenie reguł: komunikaty, obsługa statusów BookStatus i liczby storn.
+- [ ] Analiza domeny
+  - [ ] Przegląd modeli oraz routingu
+  - [ ] Zrozumienie workflow: dodanie książki -> zapis w database -> wyśwetlenie w UI
+- [ ] Testy Jednostkowe
+  - [ ] Walidacja modeli domenowych i logiki pomocniczej
+  - [ ] Sprawdzenie reguł: komunikaty, obsługa statusów BookStatus i liczby storn.
 
 
 ## Jak uruchomić
@@ -100,3 +74,42 @@ psql "$DB_URL" -U "$DB_USER" -f create_tables.sql
 Na razie używamy https://www.svgrepo.com/collection/iconship-interface-icons
 
 Inne ładne https://www.svgrepo.com/collection/software-mansion-curved-line-icons
+
+
+## Roadmap Archive
+
+### Scala
+
+- [x] Wyświetl książki
+  - [x] Wyświetlaj BookEntries
+  - [x] BookEntries wg. usera
+  - [x] "Już masz tą książkę"
+  - [x] "Ta książka nie istnieje"
+- [x] Dodaj książkę
+- [x] Pokaż detale w prawym panelu
+- [x] Na gościu nie widać książek
+- [x] Dodać edytowanie BookEntry
+- [x] Dodać usuwanie BookEntry
+- [x] Dodać zapisywanie dla guesta?
+- [x] WAŻNE - postarać się usunąć warningi przy sbt clean compile (osobny commit proszę)
+
+### UI
+
+- [x] Dodawanie książki
+- [ ] Wyświetlić wszystkie pola z Book Entry i Book w detalach
+  - [x] pagesRead (BookEntry)
+  - [x] cover (Book)
+- [x] Dodać edytowanie BookEntry w prawym panelu
+- [x] Dodać usuwanie BookEntry
+- [x] Dodać okładki książek
+- [x] Dodać logowanie!!!!!!!
+
+### Backend
+
+- [x] DB
+- [x] Przerzucić z repositories do DB
+
+### API
+
+- [x] Wybrać API
+- [x] Dodać dodawanie przez API
