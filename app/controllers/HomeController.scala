@@ -169,6 +169,73 @@ class HomeController @Inject()(
     )
   }
 
+  def createBook() = Action { implicit request: Request[AnyContent] =>
+    Ok(views.html.createBook(bookForm))
+  }
+
+  def createBookSubmit() = Action.async { implicit request =>
+    val maybeUserId: Option[Long] =
+      request.session.get("userId").map(_.toLong)
+
+    val userId: Long = maybeUserId.getOrElse(0L) // guest = 0
+    
+    bookForm.bindFromRequest().fold(
+      formWithErrors =>
+        Future.successful(
+          BadRequest(views.html.addBook(formWithErrors))
+        ),
+
+      isbn => {
+        bookEntryRepository.getAll().map(_.exists(entry =>
+          entry.userId == userId && entry.isbn == isbn
+        )).flatMap { alreadyExists =>
+          if (alreadyExists) {
+            Future.successful(
+              BadRequest(
+                views.html.addBook(
+                  bookForm.withGlobalError("Ta książka jest już w Twojej bibliotece")
+                )
+              )
+            )
+          } else {
+            openLibraryService.fetchByIsbn(isbn).flatMap {
+              case Some(fetchedBook) =>
+                val bookWithCover = ensureCover(fetchedBook)
+                val ensureGuestF: Future[Unit] = if (userId == 0L) {
+                  userRepository.getById(0L).flatMap {
+                    case Some(_) => Future.successful(())
+                    case None    => userRepository.insert(User(0L, "guest", "")).map(_ => ())
+                  }
+                } else Future.successful(())
+
+                for {
+                  existsOpt <- bookRepository.getByIsbn(bookWithCover.isbn)
+                  _ <- existsOpt match {
+                    case Some(_) => Future.successful(0) // already in database -> do nothing
+                    case None    => bookRepository.insert(bookWithCover).map(_ => 1)
+                  }
+                  _ <- ensureGuestF
+                  _ <- bookEntryRepository.insert(BookEntry(id = 0L,
+                    userId = userId,
+                    isbn = bookWithCover.isbn,
+                    altCover = ""))
+                } yield Redirect(routes.HomeController.index())
+
+              case None =>
+                Future.successful(
+                  BadRequest(
+                    views.html.addBook(
+                      bookForm.withGlobalError("Nie znaleziono książki dla tego ISBN")
+                    )
+                  )
+                )
+            }
+          }
+        }
+      }
+    )
+  }
+
   def deleteBook(id: Long) = Action.async { implicit request =>
     bookEntryRepository.delete(id).map { _ =>
       Redirect(routes.HomeController.index())
