@@ -7,6 +7,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import forms.{LoginForm, RegisterForm}
 import models.User
 import persistence.UserRepository
+import security.PasswordHasher
 
 @Singleton
 class AuthController @Inject()(
@@ -27,12 +28,12 @@ class AuthController @Inject()(
       },
       loginData => {
         userRepo.getByUsername(loginData.username).map {
-          case Some(user) if user.password == loginData.password =>
-
-            Redirect("/").withSession(
-              "username" -> user.username,
-              "userId" -> user.id.toString
-            )
+          case Some(user) 
+            if PasswordHasher.checkPassword(loginData.password, user.password) =>
+              Redirect("/").withSession(
+                "username" -> user.username,
+                "userId" -> user.id.toString
+              )
           case _ =>
 
             val formWithError = LoginForm.form.withGlobalError("Invalid username or password")
@@ -71,7 +72,7 @@ class AuthController @Inject()(
               User(
                 id = 0L,
                 username = registerData.username,
-                password = registerData.password // ❗ plain text (temporary)
+                password = PasswordHasher.hashPassword(registerData.password)
               )
             ).map { _ =>
               Redirect("/login")
