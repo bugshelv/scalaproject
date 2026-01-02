@@ -11,15 +11,15 @@
     @CSRF.formField
 
     <div class="mb-3">
-        @inputText(noteForm("title"), '_label -> "Tytuł")
+        @inputText(noteForm("title"), Symbol("_label") -> "Tytuł")
     </div>
 
     <div class="mb-3">
         @textarea(
         noteForm("content"),
-        '_label -> "Treść",
-        'class -> "form-control",
-        'rows ->6
+        Symbol("_label") -> "Treść",
+        Symbol("class") -> "form-control",
+        Symbol("rows") -> 6
         )
     </div>
 

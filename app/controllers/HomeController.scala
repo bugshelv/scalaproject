@@ -91,7 +91,8 @@ class HomeController @Inject()(
       bookEntries <- bookEntriesF
       userIsbns  <- userIsbnsF
       booksSeq   <- bookRepository.getAll()
-      val books = booksSeq.toList.filter(b => userIsbns.contains(b.isbn)).map(ensureCover)
+      books = booksSeq.toList.filter(b => userIsbns.contains(b.isbn)).map(ensureCover)
+      
       selectedBook = for {
         entry <- bookEntries.find(_.isbn == isbn)
         book  <- books.find(_.isbn == isbn)
