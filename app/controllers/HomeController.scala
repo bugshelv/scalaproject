@@ -375,6 +375,52 @@ class HomeController @Inject()(
     }
   }
 
+  def updateBookPages(entryId: Long) = Action.async { implicit request =>
+    val pagesOpt = request.body.asFormUrlEncoded
+      .flatMap(_.get("pages").flatMap(_.headOption))
+      .flatMap(s => scala.util.Try(s.toInt).toOption)
+
+    pagesOpt match {
+      case Some(pages) if pages >= 0 =>
+        for {
+          entryOpt <- bookEntryRepository.getById(entryId)
+          _ <- entryOpt match {
+            case Some(entry) =>
+              bookRepository.getByIsbn(entry.isbn).flatMap {
+                case Some(book) =>
+                  bookRepository.update(book.copy(pages = pages))
+                case None => Future.successful(0)
+              }
+            case None => Future.successful(0)
+          }
+        } yield Redirect(routes.HomeController.editBookEntry(entryId))
+      case _ => Future.successful(BadRequest("Nieprawidłowa liczba stron"))
+    }
+  }
+
+  def updateBookYear(entryId: Long) = Action.async { implicit request =>
+    val yearOpt = request.body.asFormUrlEncoded
+      .flatMap(_.get("publishYear").flatMap(_.headOption))
+      .flatMap(s => scala.util.Try(s.toInt).toOption)
+
+    yearOpt match {
+      case Some(year) if year >= 0 && year <= java.time.Year.now.getValue =>
+        for {
+          entryOpt <- bookEntryRepository.getById(entryId)
+          _ <- entryOpt match {
+            case Some(entry) =>
+              bookRepository.getByIsbn(entry.isbn).flatMap {
+                case Some(book) =>
+                  bookRepository.update(book.copy(publishYear = year))
+                case None => Future.successful(0)
+              }
+            case None => Future.successful(0)
+          }
+        } yield Redirect(routes.HomeController.editBookEntry(entryId))
+      case _ => Future.successful(BadRequest("Nieprawidłowy rok"))
+    }
+  }
+
   def updateStatus(id: Long) = Action { implicit request =>
     val statusOpt: Option[BookStatus] =
       for {

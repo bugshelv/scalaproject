@@ -117,9 +117,9 @@ username: Option[String] = None)(implicit request: play.api.mvc.RequestHeader)
                     <h3>@book.title</h3>
                     <p><strong>Autor:</strong> @book.author</p>
                     <p><strong>ISBN:</strong> @book.isbn</p>
-                    <p><strong>Rok publikacji:</strong> @book.publishYear</p>
+                    <p><strong>Rok publikacji:</strong> @if(book.publishYear == 0) {Do uzupełnienia} else {@book.publishYear}</p>
+                    <p><strong>Liczba stron:</strong> @if(book.pages == 0) {Do uzupełnienia} else {@book.pages}</p>
                     <p><strong>Przeczytane strony:</strong> @entry.pagesRead</p>
-                    <p><strong>Liczba stron:</strong> @book.pages</p>
                     <p><strong>Status:</strong> @entry.status</p>
 
                     <hr>
