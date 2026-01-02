@@ -2,10 +2,12 @@ package controllers
 
 import play.api.mvc._
 import javax.inject._
-import forms.LoginForm
-import repositories.{UserRepository => TestUserRepository}
-import persistence.UserRepository
 import scala.concurrent.{ExecutionContext, Future}
+
+import forms.{LoginForm, RegisterForm}
+import models.User
+import persistence.UserRepository
+import security.PasswordHasher
 
 @Singleton
 class AuthController @Inject()(
@@ -26,12 +28,12 @@ class AuthController @Inject()(
       },
       loginData => {
         userRepo.getByUsername(loginData.username).map {
-          case Some(user) if user.password == loginData.password =>
-
-            Redirect("/").withSession(
-              "username" -> user.username,
-              "userId" -> user.id.toString
-            )
+          case Some(user) 
+            if PasswordHasher.checkPassword(loginData.password, user.password) =>
+              Redirect("/").withSession(
+                "username" -> user.username,
+                "userId" -> user.id.toString
+              )
           case _ =>
 
             val formWithError = LoginForm.form.withGlobalError("Invalid username or password")
@@ -43,5 +45,40 @@ class AuthController @Inject()(
 
   def logout = Action {
     Redirect("/").withNewSession
+  }
+
+  def registerPage = Action { implicit request =>
+    Ok(views.html.register(RegisterForm.form))
+  }
+
+  def registerSubmit = Action.async { implicit request =>
+    RegisterForm.form.bindFromRequest().fold(
+      formWithErrors =>
+        Future.successful(
+          BadRequest(views.html.register(formWithErrors))
+        ),
+
+      registerData => {
+        userRepo.getByUsername(registerData.username).flatMap {
+          case Some(_) =>
+            val formWithError =
+              RegisterForm.form.withGlobalError("Username already exists")
+            Future.successful(
+              BadRequest(views.html.register(formWithError))
+            )
+
+          case None =>
+            userRepo.insert(
+              User(
+                id = 0L,
+                username = registerData.username,
+                password = PasswordHasher.hashPassword(registerData.password)
+              )
+            ).map { _ =>
+              Redirect("/login")
+            }
+        }
+      }
+    )
   }
 }
