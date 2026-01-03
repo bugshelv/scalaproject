@@ -1,48 +1,52 @@
 @(bookEntries: List[models.BookEntry],
 books: List[models.Book],
 selectedBook: Option[(models.BookEntry, models.Book)] = None,
+notes: Seq[models.Note] = Seq.empty,
 username: Option[String] = None,
 filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.RequestHeader)
 
 @import viewmodels.CoverResolver
+@import java.time.format.DateTimeFormatter
 
-@main("Strona główna") {
-<!-- kolory strony do zmiany w przyszłości -->
-<style>
-    .green-background-panel {
-        background-color: #4A9782;
-        padding: 20px;
-        border-radius: 4px;
-        min-height: 450px;
+    @defining(DateTimeFormatter.ofPattern("dd-MM-yyyy")){ dateFormatter =>
+
+    @main("Strona główna") {
+    <!-- kolory strony do zmiany w przyszłości -->
+    <style>
+        .green-background-panel {
+            background-color: #4A9782;
+            padding: 20px;
+            border-radius: 4px;
+            min-height: 450px;
+            color: white;
+        }
+
+        .book-button {
+        display: block;
+        width: 100%;
+        padding: 14px 16px;
+        border-radius: 6px;
         color: white;
-    }
+        text-decoration: none;
+        transition: background-color 0.2s ease;
+        margin: 10px
+        }
 
-    .book-button {
-    display: block;
-    width: 100%;
-    padding: 14px 16px;
-    border-radius: 6px;
-    color: white;
-    text-decoration: none;
-    transition: background-color 0.2s ease;
-    margin: 10px
-    }
+        .book-button:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: white;
+        }
 
-    .book-button:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-    color: white;
-    }
+        .book-button.active {
+            background-color: rgba(255, 255, 255, 0.25);
+        }
 
-    .book-button.active {
-        background-color: rgba(255, 255, 255, 0.25);
-    }
+        .book-author {
+            font-size: 0.85rem;
+            opacity: 0.85;
+        }
 
-    .book-author {
-        font-size: 0.85rem;
-        opacity: 0.85;
-    }
-
-</style>
+    </style>
 
 <div class="container mt-4">
     <div class="d-flex justify-content-end mb-3">
@@ -63,6 +67,8 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
                 <i class="bi bi-plus-lg"></i> Dodaj książkę
             </a>
         </div>
+
+        <!-- Status filter dropdown -->
         <div class="dropdown mb-3">
             <button class="btn btn-outline-secondary dropdown-toggle"
                     type="button"
@@ -70,37 +76,34 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
                     aria-expanded="false">
                 Filtruj według statusu
             </button>
-
             <ul class="dropdown-menu">
                 @defining(List(
-                ("all", "Wszystkie"),
-                ("to_read", "Planowane"),
-                ("reading", "Czytane"),
-                ("finished", "Przeczytane"),
-                ("dropped", "Porzucone")
+                    ("all", "Wszystkie"),
+                    ("to_read", "Planowane"),
+                    ("reading", "Czytane"),
+                    ("finished", "Przeczytane"),
+                    ("dropped", "Porzucone")
                 )) { statuses =>
-
                     @for((statusParam, label) <- statuses) {
-
                         @defining(
                         if (statusParam == "all") filters - "status" else filters + ("status" -> statusParam)
                         ) { queryMap =>
-
                             <li>
-                            <a class="dropdown-item @if(filters.get("status").contains(statusParam)) { active }"
-                                href="@(
-                                        routes.HomeController.index().url + 
-                                        (if (queryMap.nonEmpty) "?" + queryMap.map { case (k,v) => k + "=" + v }.mkString("&") else "")
-                                    )">
-                                @label
-                            </a>
+                                <a class="dropdown-item @if(filters.get("status").contains(statusParam)) { active }"
+                                   href="@(
+                                       routes.HomeController.index().url +
+                                       (if (queryMap.nonEmpty) "?" + queryMap.map { case (k,v) => k + "=" + v }.mkString("&") else "")
+                                   )">
+                                    @label
+                                </a>
                             </li>
-
                         }
                     }
                 }
             </ul>
         </div>
+
+        <!-- Sort dropdown -->
         <div class="dropdown mb-3 ms-2">
             <button class="btn btn-outline-secondary dropdown-toggle"
                     type="button"
@@ -117,15 +120,14 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
                     ("year_asc", "Rok ↑"),
                     ("year_desc", "Rok ↓")
                 )) { sortOptions =>
-
                     @for((sortParam, label) <- sortOptions) {
                         @defining(filters + ("sort" -> sortParam)) { queryMap =>
                             <li>
                                 <a class="dropdown-item @if(filters.get("sort").contains(sortParam)) { active }"
-                                href="@(
-                                    routes.HomeController.index().url + 
-                                    "?" + queryMap.map { case (k,v) => k + "=" + v }.mkString("&")
-                                )">
+                                   href="@(
+                                       routes.HomeController.index().url +
+                                       "?" + queryMap.map { case (k,v) => k + "=" + v }.mkString("&")
+                                   )">
                                     @label
                                 </a>
                             </li>
@@ -145,7 +147,7 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
                     @for(entry <- bookEntries) { <!-- trzeba to wycentrowac lol -->
                         @defining(books.find(_.isbn == entry.isbn)) { bookOpt =>
                             @defining(
-                                routes.HomeController.showBook(entry.isbn).url + 
+                                routes.HomeController.showBook(entry.isbn).url +
                                 (if (filters.nonEmpty) "?" + filters.map { case (k,v) => k + "=" + v }.mkString("&") else "")
                             ) { bookUrl =>
                                 <a href="@bookUrl" class="book-button @if(selectedBook.exists(_._1.isbn == entry.isbn)) { active }">
@@ -175,31 +177,52 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
                     </a>
                 </div>
 
-
                 <div class="text-center mb-3">
-                    <img
-                            src= "@CoverResolver.resolve(entry, book)"
-                            alt="Okładka książki"
-                            class="img-fluid rounded shadow"
-                            style="max-height: 300px;"
-                    >
+                    <img src="@CoverResolver.resolve(entry, book)"
+                         alt="Okładka książki"
+                         class="img-fluid rounded shadow"
+                         style="max-height: 300px;">
                 </div>
 
-
-
-
                 <h3>@book.title</h3>
-                    <p><strong>Autor:</strong> @book.author</p>
-                    <p><strong>ISBN:</strong> @book.isbn</p>
-                    <p><strong>Rok publikacji:</strong> @book.publishYear</p>
-                    <p><strong>Przeczytane strony:</strong> @entry.pagesRead</p>
-                    <p><strong>Liczba stron:</strong> @book.pages</p>
-                    <p><strong>Status:</strong> @entry.status</p>
+                <p><strong>Autor:</strong> @book.author</p>
+                <p><strong>ISBN:</strong> @book.isbn</p>
+                <p><strong>Rok publikacji:</strong> @if(book.publishYear == 0) {Do uzupełnienia} else {@book.publishYear}</p>
+                <p><strong>Liczba stron:</strong> @if(book.pages == 0) {Do uzupełnienia} else {@book.pages}</p>
+                <p><strong>Przeczytane strony:</strong> @entry.pagesRead</p>
+                <p><strong>Status:</strong> @entry.status</p>
+
+                <hr>
+
+                <h4>Notatki</h4>
+                @if(notes.isEmpty) {
+                    <p>Brak notatek do tej książki.</p>
+                } else {
+                    @for(note <- notes) {
+                        <div class="note-card mb-2 p-2 border rounded">
+                            <strong>@note.title</strong>
+                            <p>@note.content</p>
+                            <small>Utworzono: @note.createdAt.format(dateFormatter)
+                                @if(note.updatedAt.isAfter(note.createdAt)) {Ostatnia edycja: @note.updatedAt.format(dateFormatter)}</small>
+                            <div class="mt-1">
+                                <a href="@routes.NoteController.edit(note.id)" class="btn btn-sm btn-outline-primary">Edytuj</a>
+                                <form action="@routes.NoteController.delete(note.id)" method="POST" style="display:inline;">
+                                    @helper.CSRF.formField
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Usuń</button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                }
+                <a href="@routes.NoteController.add(entry.id)" class="btn btn-success btn-sm mt-2">Dodaj notatkę</a>
+
                 }.getOrElse {
                     <p>Szczegóły książki będą wyświetlone tutaj po kliknięciu.</p>
                 }
             </div>
         </div>
+    </div>
+</div>
 
-    </div> </div>
+    }
 }
