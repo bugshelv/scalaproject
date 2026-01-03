@@ -17,9 +17,9 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
 - **Bootstrap 5** - do frontendu. Dokumentacja: https://getbootstrap.com/docs/5.0/getting-started/introduction/
 
 ## Wymagania
--  **sbt (ver. sbt-1.11.7)** należy pobrać ze strony: www.scala-sbt.org/download/
-- **postgreSQL** 
-- **Docker**
+-  **sbt (ver. sbt-1.11.7)** instalacja: www.scala-sbt.org/download/
+- **postgreSQL** używając Dockera nie jest wymagane pobieranie na swój OS, w przeciwnym wypadku jest wymagane.
+- **Docker** instalacja: https://docs.docker.com/engine/install
 
 ## Jak uruchomić
 1) Skopiuj .env.sample, zapisz jako .env i uzupełnij swoimi zmiennymi
@@ -28,8 +28,8 @@ Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-frame
 4) Uruchom aplikację wpisując ```sbt run```
 5) Otwórz przeglądarkę i wejdź na http://localhost:9000/
 
-## DB 
-Aby testować z bazą danych, musicie przygotować bazę danych lokalnie (`your_username` **musi być waszym userem z linuxa**). Musicie też mieć pobranego postgresql:
+## DB - bez Dockera
+Aby testować z bazą danych, musicie przygotować bazę danych lokalnie (`your_username` **musi być waszym userem z linuxa**):
 
 ```
 sudo -u postgres createuser -P your_username
