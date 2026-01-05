@@ -1,6 +1,4 @@
-<div style="text-align:right; font-weight:bold;"> 
-    Projekt końcowy na <em>Programowanie w języku Scala</em>
-</div>
+<p align="right"><b>Projekt końcowy na <em>Programowanie w języku Scala</em></b></p>
 
 <h1 style="text-align:center; font-size:3em; margin-bottom:0.2em;"> 
     <a href="https://bugshelv.aiwo.pl" style="color:OliveDrab; text-decoration:none;">
