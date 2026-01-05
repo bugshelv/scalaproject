@@ -1,10 +1,10 @@
 <p align="right"><b>Projekt końcowy na <em>Programowanie w języku Scala</em></b></p>
 
-<h1 style="text-align:center; font-size:3em; margin-bottom:0.2em;"> 
+<p align="center">
     <a href="https://bugshelv.aiwo.pl">
         <img src="bugshelvHeader.png" alt="Bugshelv" width="400">
     </a>
-</h1>
+</p>
 
 ### Zespół:
 
