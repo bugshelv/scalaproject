@@ -1,16 +1,15 @@
-# Projekt Scala
+#### <div style="text-align: right"> Projekt końcowy na _Programowanie w języku Scala_</div>
+<h1 style="text-align:center; font-size:3em; margin-bottom:0.2em;"> 
+    <a href="https://github.com/your-repo" style="color:OliveDrab; text-decoration:none;">Bugshelv 🕮</a>
+</h1>
 
-Julia Masiarz - scala, frontend
+### Zespół:
 
-Natalia Uścińska - frontend, UI, Docker
+- **Julia Masiarz** - Scala, frontend  
+- **Natalia Uścińska** - frontend, UI, Docker  
+- **Paweł Witkowski**  
+- **Aleksandra Woźnica** - Scala, backend, frontend
 
-Paweł Witkowski
-
-Aleksandra Woźnica - scala, backend, frontend
-
-## Ważne
-Defaultowy branch (main) nazywa się play-framework, zapewne zmienimy w przyszłości nazwę na main.
-Na ten moment pobierając kod z Githuba używajcie ```git pull origin play-framework``` 
 
 ## Użyte frameworki
 - **Play** https://www.playframework.com/
@@ -57,5 +56,4 @@ psql "$DB_URL" -U "$DB_USER" -f create_tables.sql
 
 ## Ikonki (do wybrania)
 https://www.svgrepo.com/collection/iconship-interface-icons
-
 https://www.svgrepo.com/collection/software-mansion-curved-line-icons
