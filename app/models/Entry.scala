@@ -10,5 +10,7 @@ final case class Entry(
   createdAt: LocalDateTime = LocalDateTime.now(),
   status: BookStatus = BookStatus.ToRead,
   pagesRead: Int = 0,
-  altCover: String = ""
+  altCover: String = "",
+  series: Option[String] = None,
+  tags: String = ""
 )

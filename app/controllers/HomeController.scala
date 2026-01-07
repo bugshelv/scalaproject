@@ -519,6 +519,28 @@ class HomeController @Inject()(
     }
   }
 
+  def updateTags(entryId: Long) = Action.async { implicit request =>
+    val tagsOpt = request.body.asFormUrlEncoded
+      .flatMap(_.get("tags").flatMap(_.headOption))
+
+    tagsOpt match {
+      case Some(tags) =>
+        for {
+          entryOpt <- bookEntryRepository.getById(entryId)
+          _ <- entryOpt match {
+            case Some(entry) =>
+              bookRepository.getByIsbn(entry.refId).flatMap {
+                case Some(book) =>
+                  bookEntryRepository.update(entry.copy(tags = tags))
+                case None => Future.successful(0)
+              }
+            case None => Future.successful(0)
+          }
+        } yield Redirect(routes.HomeController.editBookEntry(entryId))
+      case None => Future.successful(BadRequest("Nieprawidłowe tagi"))
+    }
+  }
+
   def updateBookYear(entryId: Long) = Action.async { implicit request =>
     val yearOpt = request.body.asFormUrlEncoded
       .flatMap(_.get("publishYear").flatMap(_.headOption))

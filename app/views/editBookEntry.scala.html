@@ -147,7 +147,7 @@
         <p><strong>Liczba stron:</strong> @book.pages</p>
         }
 
-      <!-- Pages read (NO JS) -->
+      <!-- Pages read -->
       <details class="mb-3">
         <summary>
           Przeczytane strony: @entry.pagesRead ✏️
@@ -204,6 +204,28 @@
               Przeczytana
             </option>
           </select>
+
+          <button class="btn btn-success btn-sm">Zapisz</button>
+        </form>
+      </details>
+
+      <!-- Tags -->
+      <details class="mb-3">
+        <summary>
+          Tagi: @entry.tags.mkString(", ") ✏️
+        </summary>
+
+        <form action="@routes.HomeController.updateTags(entry.id)"
+              method="POST"
+              class="mt-2">
+
+          @helper.CSRF.formField
+
+          <input type="text"
+                 name="tags"
+                 value="@entry.tags"
+                 class="form-control mb-2"
+                 required>
 
           <button class="btn btn-success btn-sm">Zapisz</button>
         </form>

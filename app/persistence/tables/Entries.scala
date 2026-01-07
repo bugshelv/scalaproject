@@ -17,9 +17,11 @@ class Entries(tag: Tag) extends Table[Entry](tag, "entries") {
     def status = column[BookStatus]("status")
     def pagesRead = column[Int]("pages_read")
     def altCover = column[String]("alt_cover") // corresponding to altCover in the model
+    def series = column[Option[String]]("series")
+    def tags = column[String]("tags")
 
   def pk = primaryKey("entries_pkey", id)
-  def * = (id, userId, entryType, refId, createdAt, status, pagesRead, altCover) <> (Entry.tupled, Entry.unapply)
+  def * = (id, userId, entryType, refId, createdAt, status, pagesRead, altCover, series, tags) <> (Entry.tupled, Entry.unapply)
 }
 
 object Entries {
