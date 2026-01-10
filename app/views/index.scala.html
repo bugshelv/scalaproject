@@ -50,9 +50,18 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
     @* Sekcja użytkownika *@
     <div class="d-flex justify-content-end mb-3">
         @username.map { name =>
-        <div class="user-info">
+        <div class="user-info d-flex flex-column align-items-end">
+            <div>
             Witaj, <strong>@name</strong>!
             <a href="@routes.AuthController.logout()" class="btn btn-outline-danger btn-sm ms-2">Wyloguj się</a>
+            </div>
+
+            <div class="mt-1">
+                <a href ="@routes.NoteController.showNotes"
+                   class = "btn btn-link btn-sm p-0">
+                    Moje notatki
+                </a>
+            </div>
         </div>
         }.getOrElse {
         <a href="@routes.AuthController.loginPage()" class="btn btn-outline-primary btn-sm">Zaloguj się</a>

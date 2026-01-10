@@ -28,4 +28,7 @@ class NoteRepository @Inject()(db: Database)(implicit ec: ExecutionContext) {
   def delete(id: Long): Future[Int] =
     db.run(table.filter(_.id === id).delete)
 
+  def findByUser(userId: Long): Future[Seq[Note]] =
+    db.run(Notes.table.filter(_.userId === userId).sortBy(_.updatedAt.desc).result)
+
 }

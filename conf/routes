@@ -69,3 +69,6 @@ POST  /book/updatePages/:entryId       controllers.HomeController.updateBookPage
 
 # Update book's publish year
 POST  /book/updateYear/:entryId        controllers.HomeController.updateBookYear(entryId: Long)
+
+#For showung notes
+GET    /notes                          controllers.NoteController.showNotes

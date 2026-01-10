@@ -1,0 +1,58 @@
+@(notes: Seq[models.Note])(implicit request: play.api.mvc.RequestHeader, messages: play.api.i18n.Messages)
+
+@import helper._
+@import controllers.routes
+@import java.time.format.DateTimeFormatter
+
+@defining(DateTimeFormatter.ofPattern("dd-MM-yyyy")) { dateFormatter =>
+
+@main("Moje notatki") {
+
+<div class="position-absolute top-0 start-0 m-4">
+    <a href="@routes.HomeController.index()"
+       class="text-decoration-none text-dark d-flex align-items-center">
+        <img src="@routes.Assets.versioned("images/left-svgrepo-com.png")"
+        alt="Arrow Icon"
+        style="height: 40px; width: auto;"
+        class="me-1">
+        <img src="@routes.Assets.versioned("images/bookworm.png")"
+        alt="Bugshelv Icon"
+        style="height: 40px; width: auto;"
+        class="me-2">
+        <span class="h3 mb-0 fw-bold">Bugshelv</span>
+    </a>
+</div>
+
+<div class="container py-5 mt-5">
+    <h1 class="mb-4">Moje notatki</h1>
+
+    @if(notes.isEmpty) {
+    <p>Nie masz jeszcze żadnych notatek.</p>
+    } else {
+    <div class="list-group">
+        @for(note <- notes) {
+        <div class="note-card mb-3 p-3 border rounded bg-light text-dark">
+            <strong>@note.title</strong>
+            <p>@note.content</p>
+            <small>
+                Utworzono: @note.createdAt.format(dateFormatter)
+                @if(note.updatedAt.isAfter(note.createdAt)) {
+                | Ostatnia edycja: @note.updatedAt.format(dateFormatter)
+                }
+            </small>
+            <div class="mt-2">
+                <a href="@routes.NoteController.edit(note.id)" class="btn btn-sm btn-outline-primary me-1">Edytuj</a>
+                <form action="@routes.NoteController.delete(note.id)" method="POST" style="display:inline;">
+                    @CSRF.formField
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Usuń</button>
+                </form>
+            </div>
+        </div>
+        }
+    </div>
+    }
+
+</div>
+
+}
+}
