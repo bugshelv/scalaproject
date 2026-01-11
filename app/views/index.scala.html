@@ -196,19 +196,28 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
         <div class="col-md-5">
             <div class="green-background-panel @if(entries.nonEmpty){mt-5}">
                 @selectedBook.map { case (entry, book) =>
-                <div class="mb-3">
-                    <a href="@routes.HomeController.deleteBook(entry.id)" class="btn btn-light btn-sm shadow-sm">Usuń</a>
-                    <a href="@routes.HomeController.editBookEntry(entry.id)" class="btn btn-light btn-sm shadow-sm">Edytuj</a>
-                </div>
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <img src="@CoverResolver.resolve(entry, book)" 
+                             class="img-fluid rounded shadow w-100 h-100" 
+                             style="max-height: 300px; object-fit: contain;">
+                    </div>
+                    <div class="col-6">
+                        <div class="mb-3 text-end">
+                            <a href="@routes.HomeController.deleteBook(entry.id)" class="btn btn-light btn-sm shadow-sm me-2">
+                                <img src="@routes.Assets.versioned("images/trash-icon.svg")" alt="Usuń" style="height: 20px; width: auto;">
+                            </a>
+                            <a href="@routes.HomeController.editBookEntry(entry.id)" class="btn btn-light btn-sm shadow-sm">
+                                <img src="@routes.Assets.versioned("images/edit-icon.svg")" alt="Edytuj" style="height: 20px; width: auto;">
+                            </a>
+                        </div>
 
-                <div class="text-center mb-3">
-                    <img src="@CoverResolver.resolve(entry, book)" class="img-fluid rounded shadow" style="max-height: 300px;">
+                        <h3>@book.title</h3>
+                        <p><strong>Autor:</strong> @book.author</p>
+                        <p><strong>Status:</strong> @entry.status</p>
+                        <p><strong>Strony:</strong> @entry.pagesRead / @if(book.pages == 0) {?} else {@book.pages}</p>
+                    </div>
                 </div>
-
-                <h3>@book.title</h3>
-                <p><strong>Autor:</strong> @book.author</p>
-                <p><strong>Status:</strong> @entry.status</p>
-                <p><strong>Strony:</strong> @entry.pagesRead / @if(book.pages == 0) {?} else {@book.pages}</p>
 
                 <hr>
                 <h4>Notatki</h4>
