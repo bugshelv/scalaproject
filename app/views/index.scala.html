@@ -90,7 +90,7 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
         <div class="col-md-7">
 
             @* Filtry POWYŻEJ kontenera *@
-            @if(entries.nonEmpty) {
+            @if(entries.nonEmpty || filters.nonEmpty) {
             <div class="d-flex justify-content-start gap-2 mb-3">
                 <div class="dropdown">
                     <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -194,7 +194,7 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
 
 
         <div class="col-md-5">
-            <div class="green-background-panel @if(entries.nonEmpty){mt-5}">
+            <div class="green-background-panel @if(entries.nonEmpty || filters.nonEmpty){mt-5}">
                 @selectedBook.map { case (entry, book) =>
                 <div class="mb-3">
                     <a href="@routes.HomeController.deleteBook(entry.id)" class="btn btn-light btn-sm shadow-sm">Usuń</a>
