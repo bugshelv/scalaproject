@@ -1,6 +1,6 @@
 package models
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 
 final case class Entry(
   id: Long,
@@ -12,5 +12,6 @@ final case class Entry(
   pagesRead: Int = 0,
   altCover: String = "",
   series: Option[String] = None,
-  tags: String = ""
+  tags: String = "",
+  finishedAt: Option[LocalDate] = None
 )

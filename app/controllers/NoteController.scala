@@ -63,4 +63,18 @@ class NoteController @Inject()(
       case None => Future.successful(NotFound("Notatka nie istnieje"))
     }
   }
+
+  def showNotes = Action.async { implicit request =>
+    request.session.get("userId") match {
+      case Some(id) =>
+        val userId = id.toLong
+
+        noteRepository.findByUser(userId).map { notes =>
+          Ok(views.html.showNote(notes))
+        }
+
+      case None =>
+        Future.successful(Redirect(routes.AuthController.loginPage()))
+    }
+  }
 }

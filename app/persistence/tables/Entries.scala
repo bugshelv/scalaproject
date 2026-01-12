@@ -4,6 +4,7 @@ import models.Entry
 import models.BookStatus
 import models.EntryType
 import java.time.LocalDateTime
+import java.time.LocalDate
 
 import slick.jdbc.PostgresProfile.api._
 
@@ -19,9 +20,10 @@ class Entries(tag: Tag) extends Table[Entry](tag, "entries") {
     def altCover = column[String]("alt_cover") // corresponding to altCover in the model
     def series = column[Option[String]]("series")
     def tags = column[String]("tags")
+    def finishedAt = column[Option[LocalDate]]("finished_at")
 
   def pk = primaryKey("entries_pkey", id)
-  def * = (id, userId, entryType, refId, createdAt, status, pagesRead, altCover, series, tags) <> (Entry.tupled, Entry.unapply)
+  def * = (id, userId, entryType, refId, createdAt, status, pagesRead, altCover, series, tags, finishedAt) <> (Entry.tupled, Entry.unapply)
 }
 
 object Entries {

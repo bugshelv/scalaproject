@@ -12,6 +12,7 @@ import java.nio.file.Paths
 import java.nio.file.Files
 import play.api.Configuration
 import javax.inject._
+import java.time.LocalDate
 
 import repositories.{BookRepository => TestBookRepository}
 import repositories.{EntryRepository => TestEntryRepository}
@@ -59,9 +60,8 @@ class HomeController @Inject()(
 
     val statusFilter: Option[BookStatus] =
       filters.get("status").flatMap(s => BookStatus.fromString(s.toLowerCase))
-    
-    val titleQuery: Option[String] = filters.get("title").map(_.trim).filter(_.nonEmpty)
-    val authorQuery: Option[String] = filters.get("author").map(_.trim).filter(_.nonEmpty)
+
+    val searchQuery: Option[String] = filters.get("search").map(_.trim).filter(_.nonEmpty)
 
     val sortParam: String = filters.getOrElse("sort", "title_asc")
 
@@ -91,27 +91,22 @@ class HomeController @Inject()(
       val filteredBooks =
         booksSeq.filter(b => userRefIds.contains(b.isbn)).map(ensureCover).toList
       
-      val titleFilteredBooks = titleQuery match {
+      val searchFilteredEntries = searchQuery match {
         case Some(query) =>
           val lowerCaseQuery = query.toLowerCase
-          filteredBooks.filter { book =>
-            book.title.toLowerCase.contains(lowerCaseQuery)
-          }
-        case None => filteredBooks
+          filteredEntries.filter { entry =>
+            val matchingBook = filteredBooks.find(_.isbn == entry.refId)
+            matchingBook.exists { book =>
+              book.title.toLowerCase.contains(lowerCaseQuery) ||
+              book.author.toLowerCase.contains(lowerCaseQuery)
+              }
+            }
+        case None => filteredEntries
       } 
 
-      val finalFilteredBooks = authorQuery match {
-        case Some(query) =>
-          val lowerCaseQuery = query.toLowerCase
-          titleFilteredBooks.filter { book =>
-            book.author.toLowerCase.contains(lowerCaseQuery)
-          }
-        case None => titleFilteredBooks
-      } 
-
-      val finalFilteredIsbns = finalFilteredBooks.map(_.isbn).toSet
-      val finalFilteredEntries =
-        filteredEntries.filter(entry => finalFilteredIsbns.contains(entry.refId))
+      val finalFilteredBooks = filteredBooks.filter { book =>
+        searchFilteredEntries.exists(_.refId == book.isbn)
+      }
 
       val sortedBooks = (sortField.toLowerCase, sortOrder.toLowerCase) match {
         case ("title", "asc")  => finalFilteredBooks.sortBy(_.title)
@@ -122,7 +117,7 @@ class HomeController @Inject()(
         case ("year", "desc")  => finalFilteredBooks.sortBy(_.publishYear)(Ordering[Int].reverse)
         case _                 => finalFilteredBooks
       }
-      val sortedEntries = finalFilteredEntries.sortBy(entry => 
+      val sortedEntries = searchFilteredEntries.sortBy(entry => 
         sortedBooks.indexWhere(_.isbn == entry.refId)
       )
 
@@ -149,8 +144,7 @@ class HomeController @Inject()(
 
     val statusFilter: Option[BookStatus] = request.getQueryString("status").flatMap(s => BookStatus.fromString(s.toLowerCase))
 
-    val titleQuery: Option[String] = filters.get("title").map(_.trim).filter(_.nonEmpty)
-    val authorQuery: Option[String] = filters.get("author").map(_.trim).filter(_.nonEmpty)
+    val searchQuery: Option[String] = filters.get("search").map(_.trim).filter(_.nonEmpty)
 
     val sortParam: String = filters.getOrElse("sort", "title_asc")
 
@@ -176,27 +170,22 @@ class HomeController @Inject()(
 
         val filteredBooks = booksSeq.filter(b => filteredEntries.map(_.refId).toSet.contains(b.isbn)).map(ensureCover).toList
 
-        val titleFilteredBooks = titleQuery match {
+        val searchFilteredEntries = searchQuery match {
           case Some(query) =>
             val lowerCaseQuery = query.toLowerCase
-            filteredBooks.filter { book =>
-              book.title.toLowerCase.contains(lowerCaseQuery)
-            }
-          case None => filteredBooks
+            filteredEntries.filter { entry =>
+              val matchingBook = filteredBooks.find(_.isbn == entry.refId)
+              matchingBook.exists { book =>
+                book.title.toLowerCase.contains(lowerCaseQuery) ||
+                book.author.toLowerCase.contains(lowerCaseQuery)
+                }
+              }
+          case None => filteredEntries
         } 
 
-        val finalFilteredBooks = authorQuery match {
-          case Some(query) =>
-            val lowerCaseQuery = query.toLowerCase
-            titleFilteredBooks.filter { book =>
-              book.author.toLowerCase.contains(lowerCaseQuery)
-            }
-          case None => titleFilteredBooks
-        } 
-
-        val finalFilteredIsbns = finalFilteredBooks.map(_.isbn).toSet
-        val finalFilteredEntries =
-          filteredEntries.filter(entry => finalFilteredIsbns.contains(entry.refId))
+        val finalFilteredBooks = filteredBooks.filter { book =>
+          searchFilteredEntries.exists(_.refId == book.isbn)
+        }
 
         val sortedBooks = (sortField.toLowerCase, sortOrder.toLowerCase) match {
           case ("title", "asc")  => finalFilteredBooks.sortBy(_.title)
@@ -208,12 +197,12 @@ class HomeController @Inject()(
           case _                 => finalFilteredBooks
         }
 
-        val sortedEntries = finalFilteredEntries.sortBy(entry => 
+        val sortedEntries = searchFilteredEntries.sortBy(entry => 
           sortedBooks.indexWhere(_.isbn == entry.refId)
         )
 
         val selectedBook: Option[(Entry, Book)] = for {
-          entry <- finalFilteredEntries.find(_.refId == isbn)
+          entry <- searchFilteredEntries.find(_.refId == isbn)
           book  <- sortedBooks.find(_.isbn == isbn)
         } yield (entry, book)
 
@@ -290,7 +279,7 @@ class HomeController @Inject()(
                 for {
                   existsOpt <- bookRepository.getByIsbn(bookWithCover.isbn)
                   _ <- existsOpt match {
-                    case Some(_) => Future.successful(0) // already in database -> do nothing
+                    case Some(_) => Future.successful(0)
                     case None    => bookRepository.insert(bookWithCover).map(_ => 1)
                   }
                   _ <- ensureGuestF
@@ -417,7 +406,6 @@ class HomeController @Inject()(
 
       bookData => {
         val finalBookData = bookData.copy(isbn = isbn)
-
 
         val ensureGuestF: Future[Unit] = if (userId == 0L) {
           userRepository.getById(0L).flatMap {
