@@ -11,5 +11,7 @@ final case class Entry(
   status: BookStatus = BookStatus.ToRead,
   pagesRead: Int = 0,
   altCover: String = "",
+  series: Option[String] = None,
+  tags: String = "",
   finishedAt: Option[LocalDate] = None
 )

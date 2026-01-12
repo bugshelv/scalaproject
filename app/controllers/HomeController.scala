@@ -1,6 +1,6 @@
 package controllers
 
-import models.{Book, Entry, User, BookStatus, Note}
+import models.{Book, Entry, User, BookStatus, Note, Publication, DisplayItem}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
@@ -18,6 +18,7 @@ import repositories.{BookRepository => TestBookRepository}
 import repositories.{EntryRepository => TestEntryRepository}
 import forms.CreateBookForm
 import persistence.BookRepository
+import persistence.PublicationRepository
 import persistence.BookEntryRepository
 import persistence.NoteRepository
 import persistence.SlickColumnMappers._
@@ -33,9 +34,11 @@ import models.Entry
 class HomeController @Inject()(
                                 val controllerComponents: ControllerComponents,
                                 bookRepository: BookRepository,
+                                publicationRepository: PublicationRepository,
                                 bookEntryRepository: BookEntryRepository,
                                 userRepository: persistence.UserRepository,
                                 openLibraryService: services.OpenLibraryService,
+                                crossrefService: services.CrossrefService,
                                 noteRepository: NoteRepository,
                                 config: Configuration
                               )(implicit ec: ExecutionContext)
@@ -55,72 +58,24 @@ class HomeController @Inject()(
     val filters: Map[String, String] =
       request.queryString.view.mapValues(_.head).toMap
 
-    val statusFilter: Option[BookStatus] =
-      filters.get("status").flatMap(s => BookStatus.fromString(s.toLowerCase))
-
-    val searchQuery: Option[String] = filters.get("search").map(_.trim).filter(_.nonEmpty)
-
-    val sortParam: String = filters.getOrElse("sort", "title_asc")
-
-    val (sortField, sortOrder) = sortParam.split("_") match {
-      case Array(field, order) => (field.toLowerCase, order.toLowerCase)
-      case Array(field)        => (field.toLowerCase, "asc")
-      case _                   => ("title", "asc")
-    }
-
     val entriesF: Future[List[Entry]] = maybeUserId match {
-      case Some(userId) =>
-        bookEntryRepository.getAll().map(_.toList.filter(_.userId == userId))
-      case None =>
-        bookEntryRepository.getAll().map(_.toList.filter(_.userId == 0L))
+      case Some(userId) => bookEntryRepository.getAll().map(_.toList.filter(_.userId == userId))
+      case None         => bookEntryRepository.getAll().map(_.toList.filter(_.userId == 0L))
     }
 
     for {
       entries <- entriesF
-      booksSeq    <- bookRepository.getAll()
+      books <- bookRepository.getAll()
+      publications <- publicationRepository.getAll()
     } yield {
-      val filteredEntries = statusFilter match {
-        case Some(status) => entries.filter(_.status == status)
-        case None         => entries
-      }
-
-      val userRefIds = filteredEntries.map(_.refId).toSet
-      val filteredBooks =
-        booksSeq.filter(b => userRefIds.contains(b.isbn)).map(ensureCover).toList
+      val allItems: Seq[DisplayItem] = books.map(b => b: DisplayItem) ++ publications.map(p => p: DisplayItem)
       
-      val searchFilteredEntries = searchQuery match {
-        case Some(query) =>
-          val lowerCaseQuery = query.toLowerCase
-          filteredEntries.filter { entry =>
-            val matchingBook = filteredBooks.find(_.isbn == entry.refId)
-            matchingBook.exists { book =>
-              book.title.toLowerCase.contains(lowerCaseQuery) ||
-              book.author.toLowerCase.contains(lowerCaseQuery)
-              }
-            }
-        case None => filteredEntries
-      } 
-
-      val finalFilteredBooks = filteredBooks.filter { book =>
-        searchFilteredEntries.exists(_.refId == book.isbn)
-      }
-
-      val sortedBooks = (sortField.toLowerCase, sortOrder.toLowerCase) match {
-        case ("title", "asc")  => finalFilteredBooks.sortBy(_.title)
-        case ("title", "desc") => finalFilteredBooks.sortBy(_.title)(Ordering[String].reverse)
-        case ("author", "asc") => finalFilteredBooks.sortBy(_.author)
-        case ("author", "desc") => finalFilteredBooks.sortBy(_.author)(Ordering[String].reverse)
-        case ("year", "asc")   => finalFilteredBooks.sortBy(_.publishYear)
-        case ("year", "desc")  => finalFilteredBooks.sortBy(_.publishYear)(Ordering[Int].reverse)
-        case _                 => finalFilteredBooks
-      }
-      val sortedEntries = searchFilteredEntries.sortBy(entry => 
-        sortedBooks.indexWhere(_.isbn == entry.refId)
-      )
+      val (sortedEntries, sortedItems) =
+        utils.BookUtils.filterAndSortItems(entries, allItems, filters)
 
       val notes: Seq[Note] = Seq.empty
 
-      Ok(views.html.index(sortedEntries, sortedBooks, selectedBook = None, notes, maybeUsername, filters))
+      Ok(views.html.index(sortedEntries, sortedItems, selectedBook = None, notes, maybeUsername, filters))
     }
   }
 
@@ -131,95 +86,59 @@ class HomeController @Inject()(
     }
   }
 
-  def showBook(isbn: String) = Action.async { implicit request =>
-    val maybeUsername: Option[String] = request.session.get("username")
-    val maybeUserId: Option[Long] = request.session.get("userId").map(_.toLong)
+def showBook(posId: String) = Action.async { implicit request =>
+  val maybeUsername: Option[String] = request.session.get("username")
+  val maybeUserId: Option[Long] = request.session.get("userId").map(_.toLong)
 
-    val filters: Map[String, String] = request.queryString.map { 
-      case (k, v) => k -> v.head 
-    }
+  val filters: Map[String, String] =
+    request.queryString.view.mapValues(_.head).toMap
 
-    val statusFilter: Option[BookStatus] = request.getQueryString("status").flatMap(s => BookStatus.fromString(s.toLowerCase))
+  val entriesF: Future[List[Entry]] = maybeUserId match {
+    case Some(userId) => bookEntryRepository.getAll().map(_.toList.filter(_.userId == userId))
+    case None         => bookEntryRepository.getAll().map(_.toList.filter(_.userId == 0L))
+  }
 
-    val searchQuery: Option[String] = filters.get("search").map(_.trim).filter(_.nonEmpty)
+  entriesF.flatMap { entries =>
+    bookRepository.getAll().flatMap { booksSeq =>
+      publicationRepository.getAll().flatMap { publicationsSeq =>
+        val allItems: Seq[DisplayItem] =
+          booksSeq.map(b => b: DisplayItem) ++ publicationsSeq.map(p => p: DisplayItem)
 
-    val sortParam: String = filters.getOrElse("sort", "title_asc")
+        val (sortedEntries, sortedItems) =
+          utils.BookUtils.filterAndSortItems(entries, allItems, filters)
 
-    val (sortField, sortOrder) = sortParam.split("_") match {
-      case Array(field, order) => (field.toLowerCase, order.toLowerCase)
-      case Array(field)        => (field.toLowerCase, "asc")
-      case _                   => ("title", "asc")
-    }
+        val selectedItem: Option[(Entry, DisplayItem)] = for {
+          entry <- sortedEntries.find(_.refId == posId)
+          item  <- sortedItems.find(_.id == posId)
+        } yield (entry, item)
 
-    val entriesF: Future[List[Entry]] = maybeUserId match {
-      case Some(userId) =>
-        bookEntryRepository.getAll().map(_.toList.filter(_.userId == userId))
-      case None =>
-        bookEntryRepository.getAll().map(_.toList.filter(_.userId == 0L))
-    }
-
-    entriesF.flatMap { entries =>
-      bookRepository.getAll().flatMap { booksSeq =>
-        val filteredEntries = statusFilter match {
-          case Some(status) => entries.filter(_.status == status)
-          case None         => entries
-        }
-
-        val filteredBooks = booksSeq.filter(b => filteredEntries.map(_.refId).toSet.contains(b.isbn)).map(ensureCover).toList
-
-        val searchFilteredEntries = searchQuery match {
-          case Some(query) =>
-            val lowerCaseQuery = query.toLowerCase
-            filteredEntries.filter { entry =>
-              val matchingBook = filteredBooks.find(_.isbn == entry.refId)
-              matchingBook.exists { book =>
-                book.title.toLowerCase.contains(lowerCaseQuery) ||
-                book.author.toLowerCase.contains(lowerCaseQuery)
-                }
-              }
-          case None => filteredEntries
-        } 
-
-        val finalFilteredBooks = filteredBooks.filter { book =>
-          searchFilteredEntries.exists(_.refId == book.isbn)
-        }
-
-        val sortedBooks = (sortField.toLowerCase, sortOrder.toLowerCase) match {
-          case ("title", "asc")  => finalFilteredBooks.sortBy(_.title)
-          case ("title", "desc") => finalFilteredBooks.sortBy(_.title)(Ordering[String].reverse)
-          case ("author", "asc") => finalFilteredBooks.sortBy(_.author)
-          case ("author", "desc") => finalFilteredBooks.sortBy(_.author)(Ordering[String].reverse)
-          case ("year", "asc")   => finalFilteredBooks.sortBy(_.publishYear)
-          case ("year", "desc")  => finalFilteredBooks.sortBy(_.publishYear)(Ordering[Int].reverse)
-          case _                 => finalFilteredBooks
-        }
-
-        val sortedEntries = searchFilteredEntries.sortBy(entry => 
-          sortedBooks.indexWhere(_.isbn == entry.refId)
-        )
-
-        val selectedBook: Option[(Entry, Book)] = for {
-          entry <- searchFilteredEntries.find(_.refId == isbn)
-          book  <- sortedBooks.find(_.isbn == isbn)
-        } yield (entry, book)
-
-        val notesF: Future[Seq[Note]] = selectedBook match {
+        val notesF: Future[Seq[Note]] = selectedItem match {
           case Some((entry, _)) => noteRepository.findByBookEntry(entry.id)
           case None             => Future.successful(Seq.empty)
         }
 
         notesF.map { notes =>
-          Ok(views.html.index(sortedEntries, sortedBooks, selectedBook, notes, maybeUsername, filters))
+          Ok(views.html.index(sortedEntries, sortedItems, selectedItem, notes, maybeUsername, filters))
         }
       }
     }
   }
+}
 
   val bookForm: Form[String] = Form(
     single(
       "isbn" -> nonEmptyText.verifying(
         "Nieprawidłowy ISBN",
         isbn => isbn.replaceAll("-", "").matches("""\d{10}|\d{13}""")
+      )
+    )
+  )
+
+  val publicationForm: Form[String] = Form(
+    single(
+      "doi" -> nonEmptyText.verifying(
+        "Nieprawidłowy DOI",
+        doi => doi.matches("""10\.\d{4,9}/[-._;()/:A-Z0-9]+""") || doi.matches("""10\.\d{4,9}/[-._;()/:A-Z0-9]+""")
       )
     )
   )
@@ -256,7 +175,6 @@ class HomeController @Inject()(
           } else {
             openLibraryService.fetchByIsbn(isbn).flatMap {
               case Some(fetchedBook) =>
-                val bookWithCover = ensureCover(fetchedBook)
                 val ensureGuestF: Future[Unit] = if (userId == 0L) {
                   userRepository.getById(0L).flatMap {
                     case Some(_) => Future.successful(())
@@ -265,16 +183,16 @@ class HomeController @Inject()(
                 } else Future.successful(())
 
                 for {
-                  existsOpt <- bookRepository.getByIsbn(bookWithCover.isbn)
+                  existsOpt <- bookRepository.getByIsbn(fetchedBook.id)
                   _ <- existsOpt match {
                     case Some(_) => Future.successful(0)
-                    case None    => bookRepository.insert(bookWithCover).map(_ => 1)
+                    case None    => bookRepository.insert(fetchedBook).map(_ => 1)
                   }
                   _ <- ensureGuestF
                   _ <- bookEntryRepository.insert(Entry(id = 0L,
                     userId = userId,
                     entryType = models.EntryType.Book,
-                    refId = bookWithCover.isbn,
+                    refId = fetchedBook.id,
                     altCover = ""))
                 } yield Redirect(routes.HomeController.index())
 
@@ -284,6 +202,76 @@ class HomeController @Inject()(
                   BadRequest(
                     views.html.addBook(
                       boundForm.withGlobalError("Nie znaleziono książki dla tego ISBN")
+                    )
+                  )
+                )
+            }
+          }
+        }
+      }
+    )
+  }
+
+  def addPublication() = Action { implicit request: Request[AnyContent] =>
+    Ok(views.html.addPublication(publicationForm))
+  }
+
+  def addPublicationSubmit() = Action.async { implicit request =>
+    val maybeUserId: Option[Long] =
+      request.session.get("userId").map(_.toLong)
+
+    val userId: Long = maybeUserId.getOrElse(0L) // guest = 0
+
+    publicationForm.bindFromRequest().fold(
+      formWithErrors =>
+        Future.successful(
+          BadRequest(views.html.addPublication(formWithErrors))
+        ),
+
+      doi => {
+        bookEntryRepository.getAll().map(_.exists(entry =>
+          entry.userId == userId && entry.refId == doi
+        )).flatMap { alreadyExists =>
+          if (alreadyExists) {
+            val boundForm = publicationForm.bindFromRequest()
+            Future.successful(
+              BadRequest(
+                views.html.addPublication(
+                  boundForm.withGlobalError("Ta publikacja jest już w Twojej bibliotece")
+                )
+              )
+            )
+          } else {
+            crossrefService.fetchByDoi(doi).flatMap {
+              case Some(fetchedPublication) =>
+                // ensureCover?
+                val ensureGuestF: Future[Unit] = if (userId == 0L) {
+                  userRepository.getById(0L).flatMap {
+                    case Some(_) => Future.successful(())
+                    case None    => userRepository.insert(User(0L, "guest", "")).map(_ => ())
+                  }
+                } else Future.successful(())
+
+                for {
+                  existsOpt <- publicationRepository.getByDoi(fetchedPublication.doi)
+                  _ <- existsOpt match {
+                    case Some(_) => Future.successful(0) // already in database -> do nothing
+                    case None    => publicationRepository.insert(fetchedPublication).map(_ => 1)
+                  }
+                  _ <- ensureGuestF
+                  _ <- bookEntryRepository.insert(Entry(id = 0L,
+                    userId = userId,
+                    entryType = models.EntryType.Publication,
+                    refId = fetchedPublication.doi,
+                    altCover = ""))
+                } yield Redirect(routes.HomeController.index())
+
+              case None =>
+                val boundForm = publicationForm.bindFromRequest()
+                Future.successful(
+                  BadRequest(
+                    views.html.addPublication(
+                      boundForm.withGlobalError("Nie znaleziono publikacji dla tego DOI")
                     )
                   )
                 )
@@ -356,6 +344,9 @@ class HomeController @Inject()(
     )
   }
 
+  def createPublication(doi: String) = Action { implicit request: Request[AnyContent] =>
+    Ok(views.html.addPublication(publicationForm))
+  }
 
   def deleteBook(id: Long) = Action.async { implicit request =>
     bookEntryRepository.delete(id).map { _ =>
@@ -367,13 +358,17 @@ class HomeController @Inject()(
     val maybeUsername: Option[String] = request.session.get("username")
     for {
       entryOpt <- bookEntryRepository.getById(id)
-      bookOpt <- entryOpt match {
-        case Some(entry) => bookRepository.getByIsbn(entry.refId)
+      itemOpt <- entryOpt match {
+        case Some(entry) => 
+          bookRepository.getByIsbn(entry.refId).flatMap {
+            case Some(book) => Future.successful(Some(book: DisplayItem))
+            case None       => publicationRepository.getByDoi(entry.refId).map(_.map(p => p: DisplayItem))
+          }
         case None => Future.successful(None)
       }
     } yield {
-      (entryOpt, bookOpt) match {
-        case (Some(entry), Some(book)) => Ok(views.html.editBookEntry(entry, ensureCover(book), maybeUsername))
+      (entryOpt, itemOpt) match {
+        case (Some(entry), Some(item)) => Ok(views.html.editBookEntry(entry, ensureCover(item), maybeUsername))
         case _ => NotFound("Książka nie znaleziona")
       }
     }
@@ -406,7 +401,6 @@ class HomeController @Inject()(
           } else {
             openLibraryService.fetchByIsbn(isbn).flatMap {
               case Some(fetchedBook) =>
-                val bookWithCover = ensureCover(fetchedBook)
                 val ensureGuestF: Future[Unit] = if (userId == 0L) {
                   userRepository.getById(0L).flatMap {
                     case Some(_) => Future.successful(())
@@ -415,13 +409,13 @@ class HomeController @Inject()(
                 } else Future.successful(())
 
                 for {
-                  existsOpt <- bookRepository.getByIsbn(bookWithCover.isbn)
+                  existsOpt <- bookRepository.getByIsbn(fetchedBook.id)
                   _ <- existsOpt match {
                     case Some(_) => Future.successful(0) // already in database -> do nothing
-                    case None    => bookRepository.insert(bookWithCover).map(_ => 1)
+                    case None    => bookRepository.insert(fetchedBook).map(_ => 1)
                   }
                   _ <- ensureGuestF
-                  _ <- bookEntryRepository.insert(Entry(0L, userId, models.EntryType.Book, bookWithCover.isbn))
+                  _ <- bookEntryRepository.insert(Entry(0L, userId, models.EntryType.Book, fetchedBook.id))
                 } yield Redirect(routes.HomeController.index())
 
               case None =>
@@ -439,9 +433,12 @@ class HomeController @Inject()(
     )
   }
 
-private def ensureCover(book: Book): Book = {
-    val coverValue = if (book.cover.isEmpty) "/assets/images/placeholder_cover.png" else book.cover
-    book.copy(cover = coverValue)
+  private def ensureCover(item: DisplayItem): DisplayItem = {
+    val coverValue = if (item.cover.isEmpty) "/assets/images/placeholder_cover.png" else item.cover
+    item match {
+      case book: Book => book.copy(cover = coverValue)
+      case publication: Publication => publication.copy(cover = coverValue)
+    }
   }
 
   def serveUpload(filename: String) = Action {
