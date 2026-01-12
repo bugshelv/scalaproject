@@ -60,7 +60,7 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
     }
 
     .add-book-btn {
-        padding: 0.5rem 1.5rem;
+        padding: 0.5rem 1.1rem;
         color: white;
         border: 2px solid black;
         font-weight: 600;
@@ -68,8 +68,18 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
         background-color: black;
         transition: all 0.3s;
         text-decoration: none;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
         margin-left: 1rem;
+    }
+
+    .add-book-btn .icon-plus {
+        width: 19px;
+        height: 19px;
+        display: block;
+        fill: currentColor;
+        flex-shrink: 0;
     }
 
     .add-book-btn:hover {
@@ -138,8 +148,28 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
             Bugshelv
         </h1>
         <div class="mt-3">
-            <a href="@routes.HomeController.addBook()" class="add-book-btn">
-                <i class="bi bi-plus-lg"></i> Dodaj książkę
+            <a href="@routes.HomeController.addBook()" class="add-book-btn d-inline-flex align-items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     viewBox="0 0 24 24"
+                     class="icon-plus"
+                     aria-hidden="true">
+                    <path fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M11.25 12.75V18H12.75V12.75H18V11.25H12.75V6H11.25V11.25H6V12.75H11.25Z"/>
+                </svg>
+                Dodaj książkę
+            </a>
+
+            <a href="@routes.HomeController.addPublication()" class="add-book-btn d-inline-flex align-items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     viewBox="0 0 24 24"
+                     class="icon-plus"
+                     aria-hidden="true">
+                    <path fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M11.25 12.75V18H12.75V12.75H18V11.25H12.75V6H11.25V11.25H6V12.75H11.25Z"/>
+                </svg>
+                Dodaj publikację
             </a>
         </div>
     </div>
