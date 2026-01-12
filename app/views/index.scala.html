@@ -19,7 +19,7 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
     .green-background-panel {
         background-color: #4A9782;
         padding: 20px;
-        border-radius: 4px;
+        border-radius: 1.5rem;
         min-height: 450px;
         color: white;
     }
@@ -88,6 +88,7 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
     }
 
     .book-button {
+        background-color: rgba(255, 255, 255, 0.05);
         display: block;
         width: 100%;
         padding: 14px 16px;
@@ -119,12 +120,12 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
 
         <div>
             @username.map { name =>
-            <div class="d-flex flex-column align-items-start gap-2">
-                <a href="@routes.NoteController.showNotes" class="add-book-btn btn-sm">
+            <div class="d-flex align-items-center gap-2">
+                <a href="@routes.NoteController.showNotes()" class="login-btn btn-sm">
                     <i class="bi bi-plus-lg"></i> Moje notatki
                 </a>
 
-                <a href="@routes.HomeController.drawToReadBook" class="add-book-btn btn-sm mt-1">
+                <a href="@routes.HomeController.drawToReadBook()" class="login-btn btn-sm">
                     <i class="bi bi-plus-lg"></i> Losuj
                 </a>
             </div>
@@ -133,7 +134,7 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
 
         <div>
             @username.map { name =>
-            <div class="d-flex flex-column align-items-end gap-2">
+            <div class="d-flex align-items-center gap-2">
                 <span>Witaj, <strong>@name</strong>!</span>
                 <a href="@routes.AuthController.logout()" class="logout-btn btn-sm">Wyloguj się</a>
             </div>
@@ -147,7 +148,7 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
 
     @* Nagłówek strony *@
     <div class="text-center mb-5">
-        <h1 class="display-3 d-flex align-items-center justify-content-center">
+        <h1 style="font-weight: 900;" class="display-3 d-flex align-items-center justify-content-center">
             <img src="@routes.Assets.versioned("images/bookworm.png")"
             alt="Bugshelv Icon"
             style="height: 1em; width: auto;"
@@ -325,7 +326,7 @@ filters: Map[String, String] = Map.empty)(implicit request: play.api.mvc.Request
                                 case p: models.Publication => p.authors
                             }
                         }</p>
-                        <p><strong>Status:</strong> @entry.status</p>
+                        <p><strong>Status:</strong> @models.BookStatus.label(entry.status)</p>
                         <p><strong>Strony:</strong> @entry.pagesRead / @{
                             item match {
                                 case b: models.Book => if (b.pages == 0) "?" else b.pages.toString
