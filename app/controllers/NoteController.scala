@@ -17,7 +17,7 @@ class NoteController @Inject()(
                               )(implicit ec: ExecutionContext)
   extends MessagesAbstractController(cc) {
 
-  // Adding note
+  //Adding notes
   def add(entryId: Long) = Action { implicit request =>
     Ok(views.html.createNote(NoteForm.form, entryId))
   }
@@ -25,9 +25,7 @@ class NoteController @Inject()(
   def addSubmit(entryId: Long) = Action.async { implicit request =>
     NoteForm.form.bindFromRequest().fold(
       formWithErrors =>
-        Future.successful(
-          BadRequest(views.html.createNote(formWithErrors, entryId))
-        ),
+        Future.successful(BadRequest(views.html.createNote(formWithErrors, entryId))),
 
       noteData => {
         val userId = request.session.get("userId").map(_.toLong).getOrElse(0L)
@@ -47,7 +45,7 @@ class NoteController @Inject()(
     )
   }
 
-  //Editing note
+  //Editing notes
   def edit(noteId: Long) = Action.async { implicit request =>
     noteRepository.findById(noteId).map {
       case Some(note) =>
@@ -57,9 +55,7 @@ class NoteController @Inject()(
             note
           )
         )
-
-      case None =>
-        NotFound("Notatka nie istnieje")
+      case None => NotFound("Notatka nie istnieje")
     }
   }
 
@@ -68,42 +64,34 @@ class NoteController @Inject()(
       case Some(note) =>
         NoteForm.form.bindFromRequest().fold(
           formWithErrors =>
-            Future.successful(
-              BadRequest(views.html.editNote(formWithErrors, note))
-            ),
-
+            Future.successful(BadRequest(views.html.editNote(formWithErrors, note))),
           noteData => {
             val updatedNote = note.copy(
               title = noteData.title,
               content = noteData.content,
               updatedAt = LocalDateTime.now()
             )
-
             noteRepository.update(updatedNote).map { _ =>
               Redirect(routes.HomeController.showBookByEntryId(note.entryId))
             }
           }
         )
-
-      case None =>
-        Future.successful(NotFound("Notatka nie istnieje"))
+      case None => Future.successful(NotFound("Notatka nie istnieje"))
     }
   }
 
-  // Deleting note
+  //Deleting note
   def delete(noteId: Long) = Action.async { implicit request =>
     noteRepository.findById(noteId).flatMap {
       case Some(note) =>
         noteRepository.delete(noteId).map { _ =>
           Redirect(routes.HomeController.showBookByEntryId(note.entryId))
         }
-
-      case None =>
-        Future.successful(NotFound("Notatka nie istnieje"))
+      case None => Future.successful(NotFound("Notatka nie istnieje"))
     }
   }
 
-
+  //showing list of notes
   def showNotes = Action.async { implicit request =>
     request.session.get("userId") match {
       case Some(id) =>
@@ -118,10 +106,8 @@ class NoteController @Inject()(
                 for {
                   entryOpt <- bookEntryRepository.getById(note.entryId)
                   bookOpt  <- entryOpt match {
-                    case Some(entry) =>
-                      bookRepository.getByIsbn(entry.refId)
-                    case None =>
-                      Future.successful(None)
+                    case Some(entry) => bookRepository.getByIsbn(entry.refId)
+                    case None        => Future.successful(None)
                   }
                 } yield for {
                   entry <- entryOpt
@@ -131,8 +117,16 @@ class NoteController @Inject()(
             }.map(_.flatten)
           }
 
-        notesWithBooksF.map { notesWithBooks =>
-          Ok(views.html.showNote(notesWithBooks))
+        val groupedF: Future[Map[Book, Seq[(Note, Entry)]]] = notesWithBooksF.map { notesWithBooks =>
+          notesWithBooks
+            .groupBy { case (_, _, book) => book }
+            .map { case (book, seq) =>
+              book -> seq.map { case (note, entry, _) => (note, entry) }
+            }
+        }
+
+        groupedF.map { notesByBook =>
+          Ok(views.html.showNoteGrouped(notesByBook))
         }
 
       case None =>
