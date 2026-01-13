@@ -138,7 +138,7 @@ def showBook(posId: String) = Action.async { implicit request =>
     single(
       "doi" -> nonEmptyText.verifying(
         "Nieprawidłowy DOI",
-        doi => doi.matches("""10\.\d{4,9}/[-._;()/:A-Z0-9]+""") || doi.matches("""10\.\d{4,9}/[-._;()/:A-Z0-9]+""")
+        doi => doi.matches("""10\.\d{4,9}/[-._;()/:A-Za-z0-9]+""")
       )
     )
   )
